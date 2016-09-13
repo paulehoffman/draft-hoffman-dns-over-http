@@ -328,3 +328,18 @@ Early input to this document came from Mark Nottingham and
 and Patrick McManus.
 
 --- back
+
+Previous Work on DNS over HTTP
+=====
+
+The following is a list of earlier work that related to DNS over HTTP. It
+is very likely incomplete, but will be expanded as this document progresses.
+
+The list includes links to the tools.ietf.org site because these documents
+are all expired.
+
+* https://tools.ietf.org/html/draft-mohan-dns-query-xml
+
+* https://tools.ietf.org/html/draft-daley-dnsxml
+
+* https://tools.ietf.org/html/draft-dulaunoy-dnsop-passive-dns-cof
