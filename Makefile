@@ -1,4 +1,7 @@
-all: draft-hoffman-dns-over-http-latest.txt
+DRAFT=draft-hoffman-dns-over-http-latest
+all: $(DRAFT).txt
+
+.PRECIOUS: $(DRAFT).xml
 
 %.txt: %.xml
 	xml2rfc $<
@@ -7,3 +10,6 @@ all: draft-hoffman-dns-over-http-latest.txt
 	kramdown-rfc2629 $< >$@.new
 	# -diff $@ $@.new
 	mv $@.new $@
+
+clean:
+	$(RM) $(DRAFT).xml $(DRAFT).txt $(DRAFT).html
