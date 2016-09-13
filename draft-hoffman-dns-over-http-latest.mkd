@@ -1,0 +1,330 @@
+---
+title: DNS Queries over HTTPS
+abbrev: DNS in JSON
+docname: draft-hoffman-dns-over-http
+
+stand_alone: true
+
+ipr: trust200902
+area: Internet
+kw: Internet-Draft
+cat: std
+
+pi:
+  toc: yes
+  tocdepth: 4
+  sortrefs: yes
+  symrefs: yes
+
+author:
+ -
+   ins: P. Hoffman
+   name: Paul Hoffman
+   org: ICANN
+   email: paul.hoffman@icann.org
+
+ -
+   ins: J. Hildebrand
+   name: Joe Hildebrand
+   email: hildjj@cursive.net
+
+normative:
+  RFC1035:
+  RFC2119:
+  RFC5246:
+  RFC7230:
+  RFC7232:
+  I-D.nottingham-json-home:
+
+informative:
+  RFC5001:
+  RFC6147:
+  RFC6891:
+  RFC6975:
+  RFC7049:
+  RFC7159:
+  RFC7252:
+  RFC7435:
+  RFC7540:
+  RFC7830:
+  RFC7871:
+  I-D.hildebrand-deth:
+  I-D.hoffman-dns-in-json:
+  I-D.song-dns-wireformat-http:
+    
+--- abstract
+
+This document describes how to make DNS queries and get DNS responses over HTTPS. The main
+driver for this document is to allow clients who want to send DNS queries over HTTP
+transport to be able to do in a secure and interoperable fashion, regardless of the format
+of the responses.
+
+--- middle
+
+Introduction
+=======
+
+Over time, there have been many proposals for using HTTP and HTTPS as a substrate for DNS
+queries and responses. To date, none of those proposals have made it beyond early
+discussion, partially due to disagreement about what is the "best" method to do so. In
+particular, there has been disagreement about what the best format for the responses
+should be. Also, some early proposals have not followed best practices for using HTTP.
+
+This document defines a specific protocol for sending DNS {{RFC1035}} queries and getting DNS
+responses over HTTP {{RFC7230}} that is running over TLS {{RFC5246}}. Although there might
+be a desire to run this protocol over an insecure transport such as bare HTTP, this document
+only defines the protocol as HTTP over TLS.
+
+This design focuses on DNS stub-to-resolver communication, but DNS resolver-to-authoritative
+communication should work just as well.
+
+A server that supports this protocol is called a "DNS API server" to differentiate it from
+a "DNS server" (one that uses the regular DNS protocol). Similarly, a client supports this protocol
+is called a "DNS API client".
+
+
+## Use Cases
+
+Earlier proposals for DNS over HTTP have had many different use cases. The primary use
+case is an application that wants to avoid network path involvement with DNS. The protocol can
+be implemented in the application such as a browser if the location of the DNS API server
+can be configured, hard-coded, or discoverable such as through DHCP.
+
+Another use case is an operating system that wants to help applications when the OS
+detects broken DNS in its operations. The OS can still respond to calls such as
+getaddrinfo() and gethostbyname() by using this protocol without the applications
+needing to do anything. 
+
+A more recent use case is a small ("IoT") device that already runs COAP {{RFC7252}} and
+has a JSON {{RFC7159}} or CBOR {{RFC7049}} parser and wants to make DNS queries beyond what
+are supported by the device's operating system.
+
+An eventual use case might be editing of DNS zones by end users, such as described in
+{{I-D.hildebrand-deth}}. Such editing could easily be done using existing HTTP
+semantics.
+
+As HTTP/2 {{RFC7540}} becomes more widely deployed, this use case might become more important
+because an HTTP/2 server might push DNS responses to a client that the HTTP/2 server expects
+the client to look up.
+
+
+## Protocol Requirements
+
+The protocol described here bases its design on the following protocol requirements:
+
+* The protocol must use HTTP semantics the way that they are commonly used
+  in other protocols; there is nothing special about the DNS use case.
+
+* The protocol must run over secure transport.
+
+* The query format must be able to be flexible enough to express every normal
+  DNS query.
+
+* The response must be able to be in different formats that can be described
+  by different documents.
+
+* Both the query format and the response formats must be extensible.
+  In specific, a query must be able to contain one or more EDNS extensions,
+  including those not yet defined. Further, it must be easy to define different
+  response formats and to extend already-defined formats.
+
+A non-requirement for this protocol is that is needs to work with DNS64 {{RFC6147}}.
+
+
+## Terminology
+
+In this document, the key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as
+described in BCP 14, RFC 2119 {{RFC2119}}.
+
+
+## Queries
+
+The DNS API client finds a DNS API server through the same mechanism as for a DNS resolver:
+DHCPv4, DHCPv6, IPv6 RA, and configuration. The DNS API client then discovers the server's
+capabilities and URI temple using the mechanism described in {{discovery}}. The URI
+templates used in this protocol MUST be "https:" or "coaps:" for the scheme.
+
+To send a DNS query, the DNS API client prepares an HTTP GET request and sends it to the
+URI it received from the discovery step. The query is encoded as a set of name/value
+components using the HTTP "?name=value" syntax, with an "&" character between each pair.
+Names and values are defined in {{names_values}}.
+
+The HTTP-related requirements include:
+
+* The HTTP GET request MUST have no body.
+
+* The HTTP GET request SHOULD be sent with an HTTP "Accept:" header to say what
+type of content can be returned. If the request does not have an HTTP "Accept:" header, the
+DNS API server might return a content type that the DNS API client does not understand.
+
+* The HTTP GET request SHOULD use If-None-Match headers if earlier responses to the same
+query used HTTP ETag headers as described in {{RFC7232}}.
+
+
+For example, assume that the server's template for the query is:
+
+~~~
+   https://dnsserver.example.com/
+~~~
+
+A query for the A records for www.somecompany.com would be:
+
+~~~
+   https://dnsserver.example.com/?qn=www.somecompany.com&qt=1
+~~~
+
+The HTTP request might look like:
+
+~~~
+   GET /?qn=www.somecompany.com&qt=1 HTTP/1.1
+   User-Agent: curl/7.16.3 libcurl/7.16.3
+   Host: dnsserver.example.com
+   Accept: application/dns+json
+~~~
+
+This document only defines the semantics of the HTTP GET command for normal DNS
+queries and responses. Other verbs will be defined in the future.  Other verbs will likely
+need different authorization semantics as well as different discoverability for the
+template. For example, see {{I-D.hildebrand-deth}}.
+
+
+## Query Names and Values {#names_values}
+
+The following are the names and descriptions of values for DNS API queries. Every query
+MUST have a "qn" component and a "qt" component; all other components are optional.
+DNS header values and extensions that are not appropriate for queries are not
+defined.
+
+Note that a query can only include a single qn and a single qt component. Although it may
+be tempting to include multiple qt components (such as a single query for A and AAAA
+records), DNS implementations historically have not dealt consistently with these. If
+there are future standards for queries for multiple names and types, new components for
+those standards can be defined.
+
+qn:
+: QNAME from RFC 1035
+
+qt:
+: QTYPE from RFC 1035
+
+qc:
+: QCLASS from RFC 1035 -- if omitted, server assumes 1
+
+id:
+: ID from RFC 1035 -- if omitted, there is no default value
+
+opcode:
+: Opcode from RFC 1035 --  if omitted, server assumes 0
+
+rd:
+: RD from RFC 1035 -- if omitted, server assumes 1
+
+cd:
+: CD from RFC 4035 -- if omitted, server assumes 0
+
+do:
+: DO from RFC 4035 -- if omitted, server assumes 1
+
+The following are EDNS0 {{RFC6891}} extensions. If an extension is omitted, the server
+assumes that the extension was not given in the request.
+
+nsid:
+: Request the server's NSID, based on {{RFC5001}}
+
+dau:
+: Specify the list of signing algorithms understood, based on {{RFC6975}}.
+The value is a list of integers separated by commas (with no spaces).
+
+dhu:
+: Specify the list of hash algorithms understood, based on {{RFC6975}}.
+The value is a list of integers separated by commas (with no spaces).
+
+n3u:
+: Specify the list of NSEC3 hash algorithms understood, based on {{RFC6975}}.
+The value is a list of integers separated by commas (with no spaces).
+
+ecs:
+: Specify the client subnet, based on {{RFC7871}}.
+The value is the bytes of the ECS option, starting with byte 4,
+encoded in lowercase hexadecimal.
+
+pad:
+: Optional padding, used for the same purposes as described in {{RFC7830}}.
+
+
+See {{ianacons}} for a registry for additional names for queries.
+
+
+## Discovery {#discovery}
+
+A DNS API client discovers the capabilities of the DNS API server using
+{{I-D.nottingham-json-home}}. For queries, the link relation is TBD.
+
+Note that the response to this discover might be multiple templates. In those templates,
+some of the URI types might not be supported by the resolver; this is fine as long as at
+least one type is.  For example, if a discovery query returns both https: and coaps: URI
+templates, but the DNS API client can only generate https: queries, the other URI
+templates are ignored.
+
+If a DNS API client only has a DNS resolver address but no configuration for a DNS API
+server, the client can still use the discovery query to see if that DNS resolver is acting
+as a DNS API server. That is, some DNS resolvers will run both the DNS protocol on port 53
+and the DNS API on a different port.
+
+The discovery response may give hints that the DSN API server requires a form of HTTP
+authorization. The configuration of that authorization is out of scope for the DNS API
+protocol. TODO: Need to think about HTTP authorization mechanisms. This would allow user
+tracking, but could also free resolvers from having to use IP address ranges for
+filtering.  Several bad ideas are likely here, so let's think about it early.
+
+TODO: Need to think about how to get both an IP address and domain name for
+the SNI for HTTPS. Some ideas might come from RFC 7858.
+
+
+Responses
+=====
+
+Different response formats will provide more or less information from a DNS
+response. For example, one response type might include the information from the
+DNS header bytes while another might omit it. The amount and type of information
+that a response format gives is solely up to the format, and not defined in
+this protocol.
+
+At the time this is published, the response types are works in progress. The
+know response types include:
+
+* {{I-D.hoffman-dns-in-json}} describes a response type in JSON
+
+* {{I-D.song-dns-wireformat-http}} describes a response type in DNS wire format
+
+In the HTTP responses, the HTTP cache headers are set to shortest DNS TTL in the response.
+The HTTP responses SHOULD set the HTTP ETag headers as described in {{RFC7232}}.
+
+
+IANA Considerations {#ianacons}
+=====
+
+TODO: Create a new registry for option names for DNS queries.
+This will be a simple registry for new option names, probably with
+a designated expert.
+
+
+Security Considerations {#securitycons}
+=====
+
+This protocol requires the use of TLS for communication. If a client does not enforce
+authentication of the TLS server, the communication channel will be susceptible to many
+security problems. See {{RFC7435}} for a fuller description of non-authenticated TLS.
+
+TODO: Think about whether cross-origin resource sharing (CORS) applies to this
+protocol and, if so, how to specify it.
+
+
+Acknowledgements
+=====
+
+Early input to this document came from Mark Nottingham and
+and Patrick McManus.
+
+--- back
