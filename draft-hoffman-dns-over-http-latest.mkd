@@ -329,17 +329,22 @@ and Patrick McManus.
 
 --- back
 
-Previous Work on DNS over HTTP
+Previous Work on DNS over HTTP or in Other Formats
 =====
 
-The following is a list of earlier work that related to DNS over HTTP. It
-is very likely incomplete, but will be expanded as this document progresses.
+The following is a list of earlier work that related to DNS over HTTP or representing DNS
+data in other formats. It is very likely incomplete, but will be expanded as this document
+progresses.
 
-The list includes links to the tools.ietf.org site because these documents
-are all expired.
+The list includes links to the tools.ietf.org site (because these documents
+are all expired) and web sites of software.
+
+* https://www.nlnetlabs.nl/projects/dnssec-trigger/
 
 * https://tools.ietf.org/html/draft-mohan-dns-query-xml
 
 * https://tools.ietf.org/html/draft-daley-dnsxml
 
 * https://tools.ietf.org/html/draft-dulaunoy-dnsop-passive-dns-cof
+
+* https://tools.ietf.org/html/draft-bortzmeyer-dns-json
