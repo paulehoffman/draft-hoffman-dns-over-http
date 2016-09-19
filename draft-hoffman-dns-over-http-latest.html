@@ -378,20 +378,19 @@
 <link href="#rfc.section.1.1" rel="Chapter" title="1.1 Use Cases"/>
 <link href="#rfc.section.1.2" rel="Chapter" title="1.2 Protocol Requirements"/>
 <link href="#rfc.section.1.3" rel="Chapter" title="1.3 Terminology"/>
-<link href="#rfc.section.1.4" rel="Chapter" title="1.4 Template"/>
-<link href="#rfc.section.1.4.1" rel="Chapter" title="1.4.1 PREFIX"/>
-<link href="#rfc.section.1.4.2" rel="Chapter" title="1.4.2 QNAME"/>
-<link href="#rfc.section.1.4.3" rel="Chapter" title="1.4.3 QTYPE"/>
-<link href="#rfc.section.1.5" rel="Chapter" title="1.5 Additional Parameters"/>
-<link href="#rfc.section.1.6" rel="Chapter" title="1.6 Queries"/>
-<link href="#rfc.section.1.7" rel="Chapter" title="1.7 Discovery"/>
-<link href="#rfc.section.2" rel="Chapter" title="2 Responses"/>
-<link href="#rfc.section.3" rel="Chapter" title="3 IANA Considerations"/>
-<link href="#rfc.section.4" rel="Chapter" title="4 Security Considerations"/>
-<link href="#rfc.section.5" rel="Chapter" title="5 Acknowledgements"/>
-<link href="#rfc.references" rel="Chapter" title="6 References"/>
-<link href="#rfc.references.1" rel="Chapter" title="6.1 Normative References"/>
-<link href="#rfc.references.2" rel="Chapter" title="6.2 Informative References"/>
+<link href="#rfc.section.2" rel="Chapter" title="2 Template"/>
+<link href="#rfc.section.2.1" rel="Chapter" title="2.1 PREFIX"/>
+<link href="#rfc.section.2.2" rel="Chapter" title="2.2 QNAME"/>
+<link href="#rfc.section.2.3" rel="Chapter" title="2.3 QTYPE"/>
+<link href="#rfc.section.2.4" rel="Chapter" title="2.4 Additional Parameters"/>
+<link href="#rfc.section.3" rel="Chapter" title="3 Queries"/>
+<link href="#rfc.section.4" rel="Chapter" title="4 Responses"/>
+<link href="#rfc.section.5" rel="Chapter" title="5 IANA Considerations"/>
+<link href="#rfc.section.6" rel="Chapter" title="6 Security Considerations"/>
+<link href="#rfc.section.7" rel="Chapter" title="7 Acknowledgements"/>
+<link href="#rfc.references" rel="Chapter" title="8 References"/>
+<link href="#rfc.references.1" rel="Chapter" title="8.1 Normative References"/>
+<link href="#rfc.references.2" rel="Chapter" title="8.2 Informative References"/>
 <link href="#rfc.appendix.A" rel="Chapter" title="A Previous Work on DNS over HTTP or in Other Formats"/>
 <link href="#rfc.authors" rel="Chapter"/>
 
@@ -462,20 +461,19 @@
 <ul><li>1.1.   <a href="#rfc.section.1.1">Use Cases</a></li>
 <li>1.2.   <a href="#rfc.section.1.2">Protocol Requirements</a></li>
 <li>1.3.   <a href="#rfc.section.1.3">Terminology</a></li>
-<li>1.4.   <a href="#rfc.section.1.4">Template</a></li>
-<ul><li>1.4.1.   <a href="#rfc.section.1.4.1">PREFIX</a></li>
-<li>1.4.2.   <a href="#rfc.section.1.4.2">QNAME</a></li>
-<li>1.4.3.   <a href="#rfc.section.1.4.3">QTYPE</a></li>
-</ul><li>1.5.   <a href="#rfc.section.1.5">Additional Parameters</a></li>
-<li>1.6.   <a href="#rfc.section.1.6">Queries</a></li>
-<li>1.7.   <a href="#rfc.section.1.7">Discovery</a></li>
-</ul><li>2.   <a href="#rfc.section.2">Responses</a></li>
-<li>3.   <a href="#rfc.section.3">IANA Considerations</a></li>
-<li>4.   <a href="#rfc.section.4">Security Considerations</a></li>
-<li>5.   <a href="#rfc.section.5">Acknowledgements</a></li>
-<li>6.   <a href="#rfc.references">References</a></li>
-<ul><li>6.1.   <a href="#rfc.references.1">Normative References</a></li>
-<li>6.2.   <a href="#rfc.references.2">Informative References</a></li>
+</ul><li>2.   <a href="#rfc.section.2">Template</a></li>
+<ul><li>2.1.   <a href="#rfc.section.2.1">PREFIX</a></li>
+<li>2.2.   <a href="#rfc.section.2.2">QNAME</a></li>
+<li>2.3.   <a href="#rfc.section.2.3">QTYPE</a></li>
+<li>2.4.   <a href="#rfc.section.2.4">Additional Parameters</a></li>
+</ul><li>3.   <a href="#rfc.section.3">Queries</a></li>
+<li>4.   <a href="#rfc.section.4">Responses</a></li>
+<li>5.   <a href="#rfc.section.5">IANA Considerations</a></li>
+<li>6.   <a href="#rfc.section.6">Security Considerations</a></li>
+<li>7.   <a href="#rfc.section.7">Acknowledgements</a></li>
+<li>8.   <a href="#rfc.references">References</a></li>
+<ul><li>8.1.   <a href="#rfc.references.1">Normative References</a></li>
+<li>8.2.   <a href="#rfc.references.2">Informative References</a></li>
 </ul><li>Appendix A.   <a href="#rfc.appendix.A">Previous Work on DNS over HTTP or in Other Formats</a></li>
 <li><a href="#rfc.authors">Authors' Addresses</a></li>
 
@@ -513,20 +511,23 @@
 </ul>
 <h1 id="rfc.section.1.3"><a href="#rfc.section.1.3">1.3.</a> <a href="#terminology" id="terminology">Terminology</a></h1>
 <p id="rfc.section.1.3.p.1">In this document, the key words &#8220;MUST&#8221;, &#8220;MUST NOT&#8221;, &#8220;REQUIRED&#8221;, &#8220;SHALL&#8221;, &#8220;SHALL NOT&#8221;, &#8220;SHOULD&#8221;, &#8220;SHOULD NOT&#8221;, &#8220;RECOMMENDED&#8221;, &#8220;MAY&#8221;, and &#8220;OPTIONAL&#8221; are to be interpreted as described in BCP 14, RFC 2119 <a href="#RFC2119">[RFC2119]</a>.</p>
-<h1 id="rfc.section.1.4"><a href="#rfc.section.1.4">1.4.</a> <a href="#template" id="template">Template</a></h1>
-<p id="rfc.section.1.4.p.1">The URI template (see <a href="#RFC6570">[RFC6570]</a>) for DNS API queries is:</p>
+<h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#template" id="template">Template</a></h1>
+<p id="rfc.section.2.p.1">The URI template (see <a href="#RFC6570">[RFC6570]</a>) for DNS API queries is:</p>
 <pre>
 {PREFIX}{QNAME}/{QTYPE}
 </pre>
-<p id="rfc.section.1.4.p.2">The following variables are used to expand the URI template.</p>
-<h1 id="rfc.section.1.4.1"><a href="#rfc.section.1.4.1">1.4.1.</a> <a href="#prefix" id="prefix">PREFIX</a></h1>
-<p id="rfc.section.1.4.1.p.1">&#8220;PREFIX&#8221; will be a URI fragment, such as &#8220;https://example.net/api/&#8221;.  The URI protocol MUST be &#8220;https:&#8221; or &#8220;coaps:&#8221;.</p>
-<p id="rfc.section.1.4.1.p.2">The DNS API client discovers the PREFIX for the DNS API through the same mechanism as for a DNS resolver: DHCPv4, DHCPv6, IPv6 RA, and configuration.  Specific PREFIX discovery mechanisms will be defined later, but imagine a new RA option like that in <a href="#RFC6106">[RFC6106]</a> that gives a PREFIX.</p>
-<p id="rfc.section.1.4.1.p.3">If no PREFIX is configured as above, the client MAY query their existing DNS server for API support by doing a URI query (see <a href="#RFC7553">[RFC7553]</a>) to the domain &#8220;_dnsapi.invalid&#8221;.  If the DNS server knows about API support, the resulting URI will be the PREFIX.</p>
-<p id="rfc.section.1.4.1.p.4">Note: there are several concerns to be worked out with respect to the PREFIX, including how to bootstrap PREFIXes that contain domain names, and how to trust TLS connections to PREFIXes that contain only IP addresses in a deployable way.</p>
-<h1 id="rfc.section.1.4.2"><a href="#rfc.section.1.4.2">1.4.2.</a> <a href="#qname" id="qname">QNAME</a></h1>
-<p id="rfc.section.1.4.2.p.1">The QNAME from <a href="#RFC1035">[RFC1035]</a>.</p>
-<p id="rfc.section.1.4.2.p.2">Note: An open issue exists with how to encode non-ASCII QNAMEs.  There are several options:</p>
+<p><a href="#I-D.nottingham-json-home">[I-D.nottingham-json-home]</a> will be evaluated in the future to see if the added complexity of including it in the discovery process would make for an interesting increase in deployment flexibility.</p>
+<p id="rfc.section.2.p.3">The following variables are used to expand the URI template.</p>
+<h1 id="rfc.section.2.1"><a href="#rfc.section.2.1">2.1.</a> <a href="#prefix" id="prefix">PREFIX</a></h1>
+<p id="rfc.section.2.1.p.1">&#8220;PREFIX&#8221; will be a URI fragment, such as &#8220;https://example.net/api/&#8221;.  The URI protocol MUST be &#8220;https:&#8221; or &#8220;coaps:&#8221;.</p>
+<p id="rfc.section.2.1.p.2">The DNS API client discovers the PREFIX for the DNS API through the same mechanism as for a DNS resolver: DHCPv4, DHCPv6, IPv6 RA, and configuration.  Specific PREFIX discovery mechanisms will be defined later, but imagine a new DHCP or RA option that gives a PREFIX.</p>
+<p id="rfc.section.2.1.p.3">If no PREFIX is configured as above, the client MAY query their existing DNS server for API support by doing a DNS queury query for the URI RRtype (see <a href="#RFC7553">[RFC7553]</a>) to the domain &#8220;_dnsapi.invalid&#8221;.  If the DNS server knows about API support, the returned URI will be the PREFIX.</p>
+<p id="rfc.section.2.1.p.4">The response to this discovery might be multiple PREFIXes. In that case, some of the URI types might not be supported by the resolver; this is fine as long as at least one type is.  For example, if a discovery query returns both https: and coaps: URI templates, but the DNS API client can only generate https: queries, the other URI templates are ignored.</p>
+<p id="rfc.section.2.1.p.5">Note: there are several concerns to be worked out with respect to the PREFIX, including how to bootstrap PREFIXes that contain domain names, and how to trust TLS connections to PREFIXes that contain only IP addresses in a deployable way.  Some ideas might come from RFC 7858.</p>
+<p id="rfc.section.2.1.p.6">Note: The discovery response may give hints that the DNS API server requires a form of HTTP authorization. The configuration of that authorization is out of scope for the DNS API protocol. TODO: Need to think about HTTP authorization mechanisms. This would allow user tracking, but could also free resolvers from having to use IP address ranges for filtering.  Several bad ideas are likely here, so let&#8217;s think about it early.</p>
+<h1 id="rfc.section.2.2"><a href="#rfc.section.2.2">2.2.</a> <a href="#qname" id="qname">QNAME</a></h1>
+<p id="rfc.section.2.2.p.1">The QNAME from <a href="#RFC1035">[RFC1035]</a>.</p>
+<p id="rfc.section.2.2.p.2">Note: An open issue exists with how to encode non-ASCII domain names.  For IDNs, there are several options:</p>
 <p/>
 
 <ul>
@@ -534,12 +535,13 @@
   <li>Send the UTF8-encoded version after normalization, but before Punycoding</li>
   <li>Send generic UTF8-encoded labels, and make the server do normalization</li>
 </ul>
-<h1 id="rfc.section.1.4.3"><a href="#rfc.section.1.4.3">1.4.3.</a> <a href="#qtype" id="qtype">QTYPE</a></h1>
-<p id="rfc.section.1.4.3.p.1">The numerical QTYPE from <a href="#RFC1035">[RFC1035]</a>.</p>
-<p id="rfc.section.1.4.3.p.2">Note: there are some people that want to use the string forms, such as &#8220;AAAA&#8221;, perhaps in addition to the numerical form.  To be discussed.</p>
-<h1 id="rfc.section.1.5"><a href="#rfc.section.1.5">1.5.</a> <a href="#parameters" id="parameters">Additional Parameters</a></h1>
-<p id="rfc.section.1.5.p.1">The following are the names and descriptions of parameters for DNS API queries.  All parameters are optional. DNS header values and extensions that are not appropriate for queries are not defined.  Each parameter in the list below will need to include a use case in a later version of this document; this list is a first approximation of what may be needed.</p>
-<p id="rfc.section.1.5.p.2">Each of these parameters may be used in a query component of the URI sent to the API, to modify the request.</p>
+<p id="rfc.section.2.2.p.4">There is also a question about domain names (not host names) that have values that might cause problems in the URI format, such as values that are control characters in ASCII, and values greater than 127.</p>
+<h1 id="rfc.section.2.3"><a href="#rfc.section.2.3">2.3.</a> <a href="#qtype" id="qtype">QTYPE</a></h1>
+<p id="rfc.section.2.3.p.1">The numerical QTYPE from <a href="#RFC1035">[RFC1035]</a>.</p>
+<p id="rfc.section.2.3.p.2">Note: there are some people that want to use the string forms, such as &#8220;AAAA&#8221;, perhaps in addition to the numerical form.  To be discussed.</p>
+<h1 id="rfc.section.2.4"><a href="#rfc.section.2.4">2.4.</a> <a href="#parameters" id="parameters">Additional Parameters</a></h1>
+<p id="rfc.section.2.4.p.1">The following are the names and descriptions of parameters for DNS API queries.  All parameters are optional. DNS header values and extensions that are not appropriate for queries are not defined.  Each parameter in the list below will need to include a use case in a later version of this document; this list is a first approximation of what may be needed.</p>
+<p id="rfc.section.2.4.p.2">Each of these parameters may be used in a query component of the URI sent to the API, to modify the request.</p>
 <p/>
 
 <dl>
@@ -556,7 +558,7 @@
   <dt>do:</dt>
   <dd style="margin-left: 8">DO from <a href="#RFC4035">[RFC4035]</a> &#8211; if omitted, server assumes 1 (include RRSIG RDATA in the response)</dd>
 </dl>
-<p id="rfc.section.1.5.p.4">The following are EDNS0 <a href="#RFC6891">[RFC6891]</a> extensions. If an extension is omitted, the server assumes that the extension was not given in the request.</p>
+<p id="rfc.section.2.4.p.4">The following are EDNS0 <a href="#RFC6891">[RFC6891]</a> extensions. If an extension is omitted, the server assumes that the extension was not given in the request.</p>
 <p/>
 
 <dl>
@@ -573,10 +575,10 @@
   <dt>pad:</dt>
   <dd style="margin-left: 8">Optional padding, used for the same purposes as described in <a href="#RFC7830">[RFC7830]</a>.  This can be used to normalize the length of queries.</dd>
 </dl>
-<p id="rfc.section.1.5.p.6">See <a href="#ianacons">Section 3</a> for a registry for additional names for queries.</p>
-<h1 id="rfc.section.1.6"><a href="#rfc.section.1.6">1.6.</a> <a href="#queries" id="queries">Queries</a></h1>
-<p id="rfc.section.1.6.p.1">To send a DNS query, the DNS API client prepares an HTTP/CoAP GET request and sends it to the URI it received from the discovery step.  Additional <a href="#parameters">Section 1.5</a> (if any) are specified.</p>
-<p id="rfc.section.1.6.p.2">The HTTP-related requirements include:</p>
+<p id="rfc.section.2.4.p.6">See <a href="#ianacons">Section 5</a> for a registry for additional names for queries.</p>
+<h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#queries" id="queries">Queries</a></h1>
+<p id="rfc.section.3.p.1">To send a DNS query, the DNS API client prepares an HTTP/CoAP GET request using the template (see <a href="#template">Section 2</a>).  If any additional parameters (see <a href="#parameters">Section 2.4</a>) are desired, they are appended to the template in typical HTTPS URI fashion, using a &#8220;?&#8221; (U+003F: QUESTION MARK), then each parameter specified as a name, &#8220;=&#8221; (U+003D: EQUALS SIGN), and value, each name=value pair separated by a &#8220;&amp;&#8221; (U+0026: AMPERSAND).  Each value should be percent-encoded as needed.</p>
+<p id="rfc.section.3.p.2">The HTTP-related requirements include:</p>
 <p/>
 
 <ul>
@@ -584,56 +586,41 @@
   <li>The HTTP GET request SHOULD be sent with an HTTP &#8220;Accept:&#8221; header to say what type of content can be returned. If the request does not have an HTTP &#8220;Accept:&#8221; header, the DNS API server might return a content type that the DNS API client does not understand.</li>
   <li>The HTTP GET request SHOULD use If-None-Match headers if earlier responses to the same query used HTTP ETag headers as described in <a href="#RFC7232">[RFC7232]</a>.</li>
 </ul>
-<p id="rfc.section.1.6.p.4">For example, assume that the server&#8217;s template for the query is:</p>
+<p id="rfc.section.3.p.4">For example, assume that the server&#8217;s PREFIX is:</p>
 <pre>
-   https://dnsserver.example.net/{QNAME}/{QTYPE}
+   https://dnsserver.example.net/api1
 </pre>
-<p id="rfc.section.1.6.p.5">A query for the A records for www.example.com would be:</p>
+<p id="rfc.section.3.p.5">A query for the A records for &#8220;www.example.com&#8221; with recursion turned off would be:</p>
 <pre>
-   https://dnsserver.example.net/www.example.com/1
+   https://dnsserver.example.net/api1/www.example.com/1?rd=0
 </pre>
-<p id="rfc.section.1.6.p.6">The HTTP request might look like:</p>
+<p id="rfc.section.3.p.6">The HTTP request might look like:</p>
 <pre>
-   GET www.example.com/1 HTTP/1.1
+   GET api1/www.example.com/1?rd=0 HTTP/1.1
    User-Agent: curl/7.16.3 libcurl/7.16.3
    Host: dnsserver.example.net
    Accept: application/dns+json
 </pre>
-<p id="rfc.section.1.6.p.7">This document only defines the semantics of the HTTP/CoAP GET command for normal DNS queries and responses. Other verbs will be defined in the future.  Other verbs will likely need different authorization semantics as well as different discoverability for the template. For example, see <a href="#I-D.hildebrand-deth">[I-D.hildebrand-deth]</a>.</p>
-<h1 id="rfc.section.1.7"><a href="#rfc.section.1.7">1.7.</a> <a href="#discovery" id="discovery">Discovery</a></h1>
-<p/>
-
-<ol>
-  <li>Look for configured URL.  If it exists, and does not use IPv4 or IPv6 as the host name, look the host name up using the existing DNS infrastructure.  TODO: decide if this affects the applicability for this protocol, and discuss the trade-offs of requiring valid certificates for IP addresses for configured HTTPS URLs.</li>
-  <li>Look for DHCP/DHCPv6/RA configured URL, and proceed as above.</li>
-  <li>Look for existing DNS server IPv4/IPv6 address.  Construct a URL of the form https://{IP}/</li>
-</ol>
-<p id="rfc.section.1.7.p.2">For any of the above,</p>
-<p id="rfc.section.1.7.p.3">TODO: decide whether the extra complexity of JSON-home is warranted vs. just specifying the template parameters in this document and having a single template URL be discoverable.</p>
-<p id="rfc.section.1.7.p.4">A DNS API client discovers the capabilities of the DNS API server using <a href="#I-D.nottingham-json-home">[I-D.nottingham-json-home]</a>. For queries, the link relation is TBD.</p>
-<p id="rfc.section.1.7.p.5">Note that the response to this discovery might be multiple templates. In those templates, some of the URI types might not be supported by the resolver; this is fine as long as at least one type is.  For example, if a discovery query returns both https: and coaps: URI templates, but the DNS API client can only generate https: queries, the other URI templates are ignored.</p>
-<p id="rfc.section.1.7.p.6">If a DNS API client only has a DNS resolver address but no configuration for a DNS API server, the client can still use the discovery query to see if that DNS resolver is acting as a DNS API server. That is, some DNS resolvers will run both the DNS protocol on port 53 and the DNS API on a different port.</p>
-<p id="rfc.section.1.7.p.7">The discovery response may give hints that the DNS API server requires a form of HTTP authorization. The configuration of that authorization is out of scope for the DNS API protocol. TODO: Need to think about HTTP authorization mechanisms. This would allow user tracking, but could also free resolvers from having to use IP address ranges for filtering.  Several bad ideas are likely here, so let&#8217;s think about it early.</p>
-<p id="rfc.section.1.7.p.8">TODO: Need to think about how to get both an IP address and domain name for the SNI for HTTPS. Some ideas might come from RFC 7858.</p>
-<h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#responses" id="responses">Responses</a></h1>
-<p id="rfc.section.2.p.1">Different response formats will provide more or less information from a DNS response. For example, one response type might include the information from the DNS header bytes while another might omit it. The amount and type of information that a response format gives is solely up to the format, and not defined in this protocol.</p>
-<p id="rfc.section.2.p.2">At the time this is published, the response types are works in progress. The know response types include:</p>
+<p id="rfc.section.3.p.7">This document only defines the semantics of the HTTP/CoAP GET command for normal DNS queries and responses. Other verbs will be defined in the future.  Other verbs will likely need different authorization semantics.  For example, see <a href="#I-D.hildebrand-deth">[I-D.hildebrand-deth]</a>.</p>
+<h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> <a href="#responses" id="responses">Responses</a></h1>
+<p id="rfc.section.4.p.1">Different response formats will provide more or less information from a DNS response. For example, one response type might include the information from the DNS header bytes while another might omit it. The amount and type of information that a response format gives is solely up to the format, and not defined in this protocol.</p>
+<p id="rfc.section.4.p.2">At the time this is published, the response types are works in progress. The know response types include:</p>
 <p/>
 
 <ul>
   <li><a href="#I-D.hoffman-dns-in-json">[I-D.hoffman-dns-in-json]</a> describes a response type in JSON</li>
   <li><a href="#I-D.song-dns-wireformat-http">[I-D.song-dns-wireformat-http]</a> describes a response type in DNS wire format</li>
 </ul>
-<p id="rfc.section.2.p.4">In the HTTP responses, the HTTP cache headers are set to shortest DNS TTL in the response.  The HTTP responses SHOULD set the HTTP ETag headers as described in <a href="#RFC7232">[RFC7232]</a>.</p>
-<h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#ianacons" id="ianacons">IANA Considerations</a></h1>
-<p id="rfc.section.3.p.1">TODO: Create a new registry for option names for DNS queries.  This will be a simple registry for new option names, probably with a designated expert.</p>
-<h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> <a href="#securitycons" id="securitycons">Security Considerations</a></h1>
-<p id="rfc.section.4.p.1">This protocol requires the use of TLS for communication. If a client does not enforce authentication of the TLS server, the communication channel will be susceptible to many security problems. See <a href="#RFC7435">[RFC7435]</a> for a fuller description of non-authenticated TLS.</p>
-<p id="rfc.section.4.p.2">TODO: Think about whether cross-origin resource sharing (CORS) applies to this protocol and, if so, how to specify it.</p>
-<h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a></h1>
-<p id="rfc.section.5.p.1">Early input to this document came from Mark Nottingham and and Patrick McManus.</p>
-<h1 id="rfc.references"><a href="#rfc.references">6.</a> References</h1>
-<h1 id="rfc.references.1"><a href="#rfc.references.1">6.1.</a> Normative References</h1>
+<p id="rfc.section.4.p.4">In the HTTP responses, the HTTP cache headers are set to shortest DNS TTL in the response.  The HTTP responses SHOULD set the HTTP ETag headers as described in <a href="#RFC7232">[RFC7232]</a>.</p>
+<h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> <a href="#ianacons" id="ianacons">IANA Considerations</a></h1>
+<p id="rfc.section.5.p.1">TODO: Create a new registry for option names for DNS queries.  This will be a simple registry for new option names, probably with a designated expert.</p>
+<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> <a href="#securitycons" id="securitycons">Security Considerations</a></h1>
+<p id="rfc.section.6.p.1">This protocol requires the use of TLS for communication. If a client does not enforce authentication of the TLS server, the communication channel will be susceptible to many security problems. See <a href="#RFC7435">[RFC7435]</a> for a fuller description of non-authenticated TLS.</p>
+<p id="rfc.section.6.p.2">TODO: Think about whether cross-origin resource sharing (CORS) applies to this protocol and, if so, how to specify it.</p>
+<h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a></h1>
+<p id="rfc.section.7.p.1">Early input to this document came from Mark Nottingham and and Patrick McManus.</p>
+<h1 id="rfc.references"><a href="#rfc.references">8.</a> References</h1>
+<h1 id="rfc.references.1"><a href="#rfc.references.1">8.1.</a> Normative References</h1>
 <table>
   <tbody>
     <tr>
@@ -686,7 +673,7 @@
     </tr>
   </tbody>
 </table>
-<h1 id="rfc.references.2"><a href="#rfc.references.2">6.2.</a> Informative References</h1>
+<h1 id="rfc.references.2"><a href="#rfc.references.2">8.2.</a> Informative References</h1>
 <table>
   <tbody>
     <tr>
@@ -724,12 +711,6 @@
         <b id="RFC5001">[RFC5001]</b>
       </td>
       <td class="top"><a>Austein, R.</a>, "<a href="http://tools.ietf.org/html/rfc5001">DNS Name Server Identifier (NSID) Option</a>", RFC 5001, DOI 10.17487/RFC5001, August 2007.</td>
-    </tr>
-    <tr>
-      <td class="reference">
-        <b id="RFC6106">[RFC6106]</b>
-      </td>
-      <td class="top"><a>Jeong, J.</a>, <a>Park, S.</a>, <a>Beloeil, L.</a> and <a>S. Madanapalli</a>, "<a href="http://tools.ietf.org/html/rfc6106">IPv6 Router Advertisement Options for DNS Configuration</a>", RFC 6106, DOI 10.17487/RFC6106, November 2010.</td>
     </tr>
     <tr>
       <td class="reference">

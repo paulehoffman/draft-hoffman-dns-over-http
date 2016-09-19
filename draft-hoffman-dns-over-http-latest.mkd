@@ -40,7 +40,6 @@ normative:
 
 informative:
   RFC5001:
-  RFC6106:
   RFC6147:
   RFC6891:
   RFC6975:
@@ -145,7 +144,8 @@ In this document, the key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL 
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as
 described in BCP 14, RFC 2119 {{RFC2119}}.
 
-## Template
+Template
+=====
 
 The URI template (see {{RFC6570}}) for DNS API queries is:
 
@@ -159,19 +159,19 @@ interesting increase in deployment flexibility.
 
 The following variables are used to expand the URI template.
 
-### PREFIX
+## PREFIX
 
 "PREFIX" will be a URI fragment, such as "https://example.net/api/".  The URI
 protocol MUST be "https:" or "coaps:".
 
 The DNS API client discovers the PREFIX for the DNS API through the same
 mechanism as for a DNS resolver: DHCPv4, DHCPv6, IPv6 RA, and configuration.
-Specific PREFIX discovery mechanisms will be defined later, but imagine a new RA
-option like that in {{RFC6106}} that gives a PREFIX.
+Specific PREFIX discovery mechanisms will be defined later, but imagine a new DHCP or RA
+option that gives a PREFIX.
 
 If no PREFIX is configured as above, the client MAY query their existing DNS
-server for API support by doing a URI query (see {{RFC7553}}) to the domain
-"_dnsapi.invalid".  If the DNS server knows about API support, the resulting
+server for API support by doing a DNS queury query for the URI RRtype (see {{RFC7553}}) to the domain
+"_dnsapi.invalid".  If the DNS server knows about API support, the returned
 URI will be the PREFIX.
 
 The response to this discovery might be multiple PREFIXes. In that
@@ -193,18 +193,23 @@ having to use IP address ranges for filtering.  Several bad ideas are likely
 here, so let's think about it early.
 
 
-### QNAME
+## QNAME
 
 The QNAME from {{RFC1035}}.
 
-Note: An open issue exists with how to encode non-ASCII QNAMEs.  There are
+Note: An open issue exists with how to encode non-ASCII domain names.
+For IDNs, there are
 several options:
 
 * Punycode all labels before sending
 * Send the UTF8-encoded version after normalization, but before Punycoding
 * Send generic UTF8-encoded labels, and make the server do normalization
 
-### QTYPE
+There is also a question about domain names (not host names) that have values
+that might cause problems in the URI format, such as values that are control
+characters in ASCII, and values greater than 127.
+
+## QTYPE
 
 The numerical QTYPE from {{RFC1035}}.
 
@@ -273,7 +278,8 @@ pad:
 
 See {{ianacons}} for a registry for additional names for queries.
 
-## Queries
+Queries
+=====
 
 To send a DNS query, the DNS API client prepares an HTTP/CoAP GET request using
 the template (see {{template}}).  If any additional parameters
@@ -298,20 +304,20 @@ query used HTTP ETag headers as described in {{RFC7232}}.
 For example, assume that the server's PREFIX is:
 
 ~~~
-   https://dnsserver.example.net/
+   https://dnsserver.example.net/api1
 ~~~
 
-A query for the A records for "www.example.com" with three z's used as padding
+A query for the A records for "www.example.com" with recursion turned off
 would be:
 
 ~~~
-   https://dnsserver.example.net/www.example.com/1?pad=zzz
+   https://dnsserver.example.net/api1/www.example.com/1?rd=0
 ~~~
 
 The HTTP request might look like:
 
 ~~~
-   GET www.example.com/1?pad=zzz HTTP/1.1
+   GET api1/www.example.com/1?rd=0 HTTP/1.1
    User-Agent: curl/7.16.3 libcurl/7.16.3
    Host: dnsserver.example.net
    Accept: application/dns+json
