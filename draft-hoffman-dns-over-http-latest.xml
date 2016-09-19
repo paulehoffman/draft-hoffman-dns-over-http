@@ -28,7 +28,7 @@
       </address>
     </author>
 
-    <date year="2016" month="September" day="13"/>
+    <date year="2016" month="September" day="19"/>
 
     <area>Internet</area>
     
@@ -92,9 +92,10 @@ are supported by the device’s operating system.</t>
 <xref target="I-D.hildebrand-deth"/>. Such editing could easily be done using existing HTTP
 semantics.</t>
 
-<t>As HTTP/2 <xref target="RFC7540"/> becomes more widely deployed, this use case might become more important
-because an HTTP/2 server might push DNS responses to a client that the HTTP/2 server expects
-the client to look up.</t>
+<t>As HTTP/2 <xref target="RFC7540"/> and QUIC <xref target="I-D.hamilton-early-deployment-quic"/> become
+more widely deployed, this protocols might become more important because an
+HTTP/2 or QUIC server might push DNS responses to a client that the HTTP/2 server
+expects the client to look up.</t>
 
 </section>
 <section anchor="protocol-requirements" title="Protocol Requirements">
@@ -115,7 +116,12 @@ including those not yet defined. Further, it must be easy to define different
 response formats and to extend already-defined formats.</t>
 </list></t>
 
-<t>A non-requirement for this protocol is that is needs to work with DNS64 <xref target="RFC6147"/>.</t>
+<t>Non-requirements:</t>
+
+<t><list style="symbols">
+  <t>Supporting network-specific DNS64 <xref target="RFC6147"/></t>
+  <t>Supporting other network-specific inferences from plaintext DNS queries</t>
+</list></t>
 
 </section>
 <section anchor="terminology" title="Terminology">
@@ -125,17 +131,121 @@ response formats and to extend already-defined formats.</t>
 described in BCP 14, RFC 2119 <xref target="RFC2119"/>.</t>
 
 </section>
+<section anchor="template" title="Template">
+
+<t>The URI template (see <xref target="RFC6570"/>) for DNS API queries is:</t>
+
+<figure><artwork><![CDATA[
+{PREFIX}{QNAME}/{QTYPE}
+]]></artwork></figure>
+
+<t>The following variables are used to expand the URI template.</t>
+
+<section anchor="prefix" title="PREFIX">
+
+<t>“PREFIX” will be a URI fragment, such as “https://example.net/api/”.  The URI
+protocol MUST be “https:” or “coaps:”.</t>
+
+<t>The DNS API client discovers the PREFIX for the DNS API through the same
+mechanism as for a DNS resolver: DHCPv4, DHCPv6, IPv6 RA, and configuration.
+Specific PREFIX discovery mechanisms will be defined later, but imagine a new RA
+option like that in <xref target="RFC6106"/> that gives a PREFIX.</t>
+
+<t>If no PREFIX is configured as above, the client MAY query their existing DNS
+server for API support by doing a URI query (see <xref target="RFC7553"/>) to the domain
+“_dnsapi.invalid”.  If the DNS server knows about API support, the resulting
+URI will be the PREFIX.</t>
+
+<t>Note: there are several concerns to be worked out with respect to the PREFIX,
+including how to bootstrap PREFIXes that contain domain names, and how to trust
+TLS connections to PREFIXes that contain only IP addresses in a deployable way.</t>
+
+</section>
+<section anchor="qname" title="QNAME">
+
+<t>The QNAME from <xref target="RFC1035"/>.</t>
+
+<t>Note: An open issue exists with how to encode non-ASCII QNAMEs.  There are
+several options:</t>
+
+<t><list style="symbols">
+  <t>Punycode all labels before sending</t>
+  <t>Send the UTF8-encoded version after normalization, but before Punycoding</t>
+  <t>Send generic UTF8-encoded labels, and make the server do normalization</t>
+</list></t>
+
+</section>
+<section anchor="qtype" title="QTYPE">
+
+<t>The numerical QTYPE from <xref target="RFC1035"/>.</t>
+
+<t>Note: there are some people that want to use the string forms, such as “AAAA”,
+perhaps in addition to the numerical form.  To be discussed.</t>
+
+</section>
+</section>
+<section anchor="parameters" title="Additional Parameters">
+
+<t>The following are the names and descriptions of parameters for DNS API queries.
+All parameters are optional. DNS header values and extensions that are not
+appropriate for queries are not defined.  Each parameter in the list below will
+need to include a use case in a later version of this document; this list is a
+first approximation of what may be needed.</t>
+
+<t>Each of these parameters may be used in a query component of the URI sent
+to the API, to modify the request.</t>
+
+<t><list style="hanging">
+  <t hangText='qc:'>
+  QCLASS from <xref target="RFC1035"/> – if omitted, server assumes 1 (IN).  Might be needed
+to support legacy DNS classes, or to access interesting new DNS capabilities.</t>
+  <t hangText='id:'>
+  ID from <xref target="RFC1035"/> – if omitted, there is no default value.  Could be used
+to track responses.</t>
+  <t hangText='opcode:'>
+  Opcode from <xref target="RFC1035"/> –  if omitted, server assumes 0 (standard query)</t>
+  <t hangText='rd:'>
+  RD from <xref target="RFC1035"/> – if omitted, server assumes 1 (recursion desired)</t>
+  <t hangText='cd:'>
+  CD from <xref target="RFC4035"/> – if omitted, server assumes 1 (DNSSec checking
+by the resolver disabled)</t>
+  <t hangText='do:'>
+  DO from <xref target="RFC4035"/> – if omitted, server assumes 1 (include RRSIG RDATA
+in the response)</t>
+</list></t>
+
+<t>The following are EDNS0 <xref target="RFC6891"/> extensions. If an extension is omitted, the server
+assumes that the extension was not given in the request.</t>
+
+<t><list style="hanging">
+  <t hangText='nsid:'>
+  Request the server’s NSID, based on <xref target="RFC5001"/>.  Set to “1” to enable.</t>
+  <t hangText='dau:'>
+  Specify the list of signing algorithms understood, based on <xref target="RFC6975"/>.
+The value is a list of integers separated by commas (with no spaces).</t>
+  <t hangText='dhu:'>
+  Specify the list of hash algorithms understood, based on <xref target="RFC6975"/>.
+The value is a list of integers separated by commas (with no spaces).</t>
+  <t hangText='n3u:'>
+  Specify the list of NSEC3 hash algorithms understood, based on <xref target="RFC6975"/>.
+The value is a list of integers separated by commas (with no spaces).</t>
+  <t hangText='ecs:'>
+  Specify the client subnet, based on <xref target="RFC7871"/>.
+The value is the bytes of the ECS option, starting with byte 4,
+encoded in lowercase hexadecimal.</t>
+  <t hangText='pad:'>
+  Optional padding, used for the same purposes as described in <xref target="RFC7830"/>.
+This can be used to normalize the length of queries.</t>
+</list></t>
+
+<t>See <xref target="ianacons"/> for a registry for additional names for queries.</t>
+
+</section>
 <section anchor="queries" title="Queries">
 
-<t>The DNS API client finds a DNS API server through the same mechanism as for a DNS resolver:
-DHCPv4, DHCPv6, IPv6 RA, and configuration. The DNS API client then discovers the server’s
-capabilities and URI temple using the mechanism described in <xref target="discovery"/>. The URI
-templates used in this protocol MUST be “https:” or “coaps:” for the scheme.</t>
-
-<t>To send a DNS query, the DNS API client prepares an HTTP GET request and sends it to the
-URI it received from the discovery step. The query is encoded as a set of name/value
-components using the HTTP “?name=value” syntax, with an “&amp;” character between each pair.
-Names and values are defined in <xref target="names_values"/>.</t>
+<t>To send a DNS query, the DNS API client prepares an HTTP/CoAP GET request and
+sends it to the URI it received from the discovery step.  Additional <xref target="parameters"/>
+(if any) are specified.</t>
 
 <t>The HTTP-related requirements include:</t>
 
@@ -151,94 +261,53 @@ query used HTTP ETag headers as described in <xref target="RFC7232"/>.</t>
 <t>For example, assume that the server’s template for the query is:</t>
 
 <figure><artwork><![CDATA[
-   https://dnsserver.example.com/
+   https://dnsserver.example.net/{QNAME}/{QTYPE}
 ]]></artwork></figure>
 
-<t>A query for the A records for www.somecompany.com would be:</t>
+<t>A query for the A records for www.example.com would be:</t>
 
 <figure><artwork><![CDATA[
-   https://dnsserver.example.com/?qn=www.somecompany.com&qt=1
+   https://dnsserver.example.net/www.example.com/1
 ]]></artwork></figure>
 
 <t>The HTTP request might look like:</t>
 
 <figure><artwork><![CDATA[
-   GET /?qn=www.somecompany.com&qt=1 HTTP/1.1
+   GET www.example.com/1 HTTP/1.1
    User-Agent: curl/7.16.3 libcurl/7.16.3
-   Host: dnsserver.example.com
+   Host: dnsserver.example.net
    Accept: application/dns+json
 ]]></artwork></figure>
 
-<t>This document only defines the semantics of the HTTP GET command for normal DNS
+<t>This document only defines the semantics of the HTTP/CoAP GET command for normal DNS
 queries and responses. Other verbs will be defined in the future.  Other verbs will likely
 need different authorization semantics as well as different discoverability for the
 template. For example, see <xref target="I-D.hildebrand-deth"/>.</t>
 
 </section>
-<section anchor="names_values" title="Query Names and Values">
-
-<t>The following are the names and descriptions of values for DNS API queries. Every query
-MUST have a “qn” component and a “qt” component; all other components are optional.
-DNS header values and extensions that are not appropriate for queries are not
-defined.</t>
-
-<t>Note that a query can only include a single qn and a single qt component. Although it may
-be tempting to include multiple qt components (such as a single query for A and AAAA
-records), DNS implementations historically have not dealt consistently with these. If
-there are future standards for queries for multiple names and types, new components for
-those standards can be defined.</t>
-
-<t><list style="hanging">
-  <t hangText='qn:'>
-  QNAME from RFC 1035</t>
-  <t hangText='qt:'>
-  QTYPE from RFC 1035</t>
-  <t hangText='qc:'>
-  QCLASS from RFC 1035 – if omitted, server assumes 1</t>
-  <t hangText='id:'>
-  ID from RFC 1035 – if omitted, there is no default value</t>
-  <t hangText='opcode:'>
-  Opcode from RFC 1035 –  if omitted, server assumes 0</t>
-  <t hangText='rd:'>
-  RD from RFC 1035 – if omitted, server assumes 1</t>
-  <t hangText='cd:'>
-  CD from RFC 4035 – if omitted, server assumes 0</t>
-  <t hangText='do:'>
-  DO from RFC 4035 – if omitted, server assumes 1</t>
-</list></t>
-
-<t>The following are EDNS0 <xref target="RFC6891"/> extensions. If an extension is omitted, the server
-assumes that the extension was not given in the request.</t>
-
-<t><list style="hanging">
-  <t hangText='nsid:'>
-  Request the server’s NSID, based on <xref target="RFC5001"/></t>
-  <t hangText='dau:'>
-  Specify the list of signing algorithms understood, based on <xref target="RFC6975"/>.
-The value is a list of integers separated by commas (with no spaces).</t>
-  <t hangText='dhu:'>
-  Specify the list of hash algorithms understood, based on <xref target="RFC6975"/>.
-The value is a list of integers separated by commas (with no spaces).</t>
-  <t hangText='n3u:'>
-  Specify the list of NSEC3 hash algorithms understood, based on <xref target="RFC6975"/>.
-The value is a list of integers separated by commas (with no spaces).</t>
-  <t hangText='ecs:'>
-  Specify the client subnet, based on <xref target="RFC7871"/>.
-The value is the bytes of the ECS option, starting with byte 4,
-encoded in lowercase hexadecimal.</t>
-  <t hangText='pad:'>
-  Optional padding, used for the same purposes as described in <xref target="RFC7830"/>.</t>
-</list></t>
-
-<t>See <xref target="ianacons"/> for a registry for additional names for queries.</t>
-
-</section>
 <section anchor="discovery" title="Discovery">
+
+<t><list style="numbers">
+  <t>Look for configured URL.  If it exists, and does not use IPv4 or IPv6 as
+the host name, look the host name up using the existing DNS infrastructure.
+TODO: decide if this affects the applicability for this protocol, and discuss
+the trade-offs of requiring valid certificates for IP addresses for configured
+HTTPS URLs.</t>
+  <t>Look for DHCP/DHCPv6/RA configured URL, and proceed as above.</t>
+  <t>Look for existing DNS server IPv4/IPv6 address.  Construct a URL of the form
+https://{IP}/</t>
+</list></t>
+
+<t>For any of the above,</t>
+
+<t>TODO: decide whether the extra complexity of JSON-home is warranted vs. just
+specifying the template parameters in this document and having a single template
+URL be discoverable.</t>
 
 <t>A DNS API client discovers the capabilities of the DNS API server using
 <xref target="I-D.nottingham-json-home"/>. For queries, the link relation is TBD.</t>
 
-<t>Note that the response to this discover might be multiple templates. In those templates,
+<t>Note that the response to this discovery might be multiple templates. In those templates,
 some of the URI types might not be supported by the resolver; this is fine as long as at
 least one type is.  For example, if a discovery query returns both https: and coaps: URI
 templates, but the DNS API client can only generate https: queries, the other URI
@@ -249,7 +318,7 @@ server, the client can still use the discovery query to see if that DNS resolver
 as a DNS API server. That is, some DNS resolvers will run both the DNS protocol on port 53
 and the DNS API on a different port.</t>
 
-<t>The discovery response may give hints that the DSN API server requires a form of HTTP
+<t>The discovery response may give hints that the DNS API server requires a form of HTTP
 authorization. The configuration of that authorization is out of scope for the DNS API
 protocol. TODO: Need to think about HTTP authorization mechanisms. This would allow user
 tracking, but could also free resolvers from having to use IP address ranges for
@@ -343,6 +412,23 @@ and Patrick McManus.</t>
 
 
 
+<reference  anchor='RFC4035' target='http://www.rfc-editor.org/info/rfc4035'>
+<front>
+<title>Protocol Modifications for the DNS Security Extensions</title>
+<author initials='R.' surname='Arends' fullname='R. Arends'><organization /></author>
+<author initials='R.' surname='Austein' fullname='R. Austein'><organization /></author>
+<author initials='M.' surname='Larson' fullname='M. Larson'><organization /></author>
+<author initials='D.' surname='Massey' fullname='D. Massey'><organization /></author>
+<author initials='S.' surname='Rose' fullname='S. Rose'><organization /></author>
+<date year='2005' month='March' />
+<abstract><t>This document is part of a family of documents that describe the DNS Security Extensions (DNSSEC).  The DNS Security Extensions are a collection of new resource records and protocol modifications that add data origin authentication and data integrity to the DNS.  This document describes the DNSSEC protocol modifications.  This document defines the concept of a signed zone, along with the requirements for serving and resolving by using DNSSEC.  These techniques allow a security-aware resolver to authenticate both DNS resource records and authoritative DNS error indications. </t><t> This document obsoletes RFC 2535 and incorporates changes from all updates to RFC 2535.  [STANDARDS-TRACK]</t></abstract>
+</front>
+<seriesInfo name='RFC' value='4035'/>
+<seriesInfo name='DOI' value='10.17487/RFC4035'/>
+</reference>
+
+
+
 <reference  anchor='RFC5246' target='http://www.rfc-editor.org/info/rfc5246'>
 <front>
 <title>The Transport Layer Security (TLS) Protocol Version 1.2</title>
@@ -353,6 +439,23 @@ and Patrick McManus.</t>
 </front>
 <seriesInfo name='RFC' value='5246'/>
 <seriesInfo name='DOI' value='10.17487/RFC5246'/>
+</reference>
+
+
+
+<reference  anchor='RFC6570' target='http://www.rfc-editor.org/info/rfc6570'>
+<front>
+<title>URI Template</title>
+<author initials='J.' surname='Gregorio' fullname='J. Gregorio'><organization /></author>
+<author initials='R.' surname='Fielding' fullname='R. Fielding'><organization /></author>
+<author initials='M.' surname='Hadley' fullname='M. Hadley'><organization /></author>
+<author initials='M.' surname='Nottingham' fullname='M. Nottingham'><organization /></author>
+<author initials='D.' surname='Orchard' fullname='D. Orchard'><organization /></author>
+<date year='2012' month='March' />
+<abstract><t>A URI Template is a compact sequence of characters for describing a range of Uniform Resource Identifiers through variable expansion. This specification defines the URI Template syntax and the process for expanding a URI Template into a URI reference, along with guidelines for the use of URI Templates on the Internet.   [STANDARDS-TRACK]</t></abstract>
+</front>
+<seriesInfo name='RFC' value='6570'/>
+<seriesInfo name='DOI' value='10.17487/RFC6570'/>
 </reference>
 
 
@@ -385,23 +488,16 @@ and Patrick McManus.</t>
 
 
 
-<reference anchor='I-D.nottingham-json-home'>
+<reference  anchor='RFC7553' target='http://www.rfc-editor.org/info/rfc7553'>
 <front>
-<title>Home Documents for HTTP APIs</title>
-
-<author initials='M' surname='Nottingham' fullname='Mark Nottingham'>
-    <organization />
-</author>
-
-<date month='May' day='22' year='2016' />
-
-<abstract><t>This document proposes a "home document" format for non-browser HTTP clients.</t></abstract>
-
+<title>The Uniform Resource Identifier (URI) DNS Resource Record</title>
+<author initials='P.' surname='Faltstrom' fullname='P. Faltstrom'><organization /></author>
+<author initials='O.' surname='Kolkman' fullname='O. Kolkman'><organization /></author>
+<date year='2015' month='June' />
+<abstract><t>This document describes the already registered DNS resource record (RR) type, called the Uniform Resource Identifier (URI) RR, that is used for publishing mappings from hostnames to URIs.</t></abstract>
 </front>
-
-<seriesInfo name='Internet-Draft' value='draft-nottingham-json-home-04' />
-<format type='TXT'
-        target='http://www.ietf.org/internet-drafts/draft-nottingham-json-home-04.txt' />
+<seriesInfo name='RFC' value='7553'/>
+<seriesInfo name='DOI' value='10.17487/RFC7553'/>
 </reference>
 
 
@@ -424,6 +520,22 @@ and Patrick McManus.</t>
 </front>
 <seriesInfo name='RFC' value='5001'/>
 <seriesInfo name='DOI' value='10.17487/RFC5001'/>
+</reference>
+
+
+
+<reference  anchor='RFC6106' target='http://www.rfc-editor.org/info/rfc6106'>
+<front>
+<title>IPv6 Router Advertisement Options for DNS Configuration</title>
+<author initials='J.' surname='Jeong' fullname='J. Jeong'><organization /></author>
+<author initials='S.' surname='Park' fullname='S. Park'><organization /></author>
+<author initials='L.' surname='Beloeil' fullname='L. Beloeil'><organization /></author>
+<author initials='S.' surname='Madanapalli' fullname='S. Madanapalli'><organization /></author>
+<date year='2010' month='November' />
+<abstract><t>This document specifies IPv6 Router Advertisement options to allow IPv6 routers to advertise a list of DNS recursive server addresses and a DNS Search List to IPv6 hosts.  [STANDARDS-TRACK]</t></abstract>
+</front>
+<seriesInfo name='RFC' value='6106'/>
+<seriesInfo name='DOI' value='10.17487/RFC6106'/>
 </reference>
 
 
@@ -573,6 +685,39 @@ and Patrick McManus.</t>
 
 
 
+<reference anchor='I-D.hamilton-early-deployment-quic'>
+<front>
+<title>QUIC: A UDP-Based Secure and Reliable Transport for HTTP/2</title>
+
+<author initials='R' surname='Hamilton' fullname='Ryan Hamilton'>
+    <organization />
+</author>
+
+<author initials='J' surname='Iyengar' fullname='Janardhan Iyengar'>
+    <organization />
+</author>
+
+<author initials='I' surname='Swett' fullname='Ian Swett'>
+    <organization />
+</author>
+
+<author initials='A' surname='Wilk' fullname='Alyssa Wilk'>
+    <organization />
+</author>
+
+<date month='July' day='8' year='2016' />
+
+<abstract><t>QUIC (Quick UDP Internet Connection) is a new multiplexed and secure transport atop UDP, designed from the ground up and optimized for HTTP/2 semantics.  While built with HTTP/2 as the primary application protocol, QUIC builds on decades of transport and security experience, and implements mechanisms that make it attractive as a modern general-purpose transport.  QUIC provides multiplexing and flow control equivalent to HTTP/2, security equivalent to TLS, and connection semantics, reliability, and congestion control equivalent to TCP.  This draft documents the early deployment of the QUIC protocol prior to standardization.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-hamilton-early-deployment-quic-00' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-hamilton-early-deployment-quic-00.txt' />
+</reference>
+
+
+
 <reference anchor='I-D.hildebrand-deth'>
 <front>
 <title>DNS Editing Through HTTPS (DETH)</title>
@@ -581,7 +726,7 @@ and Patrick McManus.</t>
     <organization />
 </author>
 
-<author initials='P' surname='Hoffman' fullname='Paul E. Hoffman'>
+<author initials='P' surname='Hoffman' fullname='Paul Hoffman'>
     <organization />
 </author>
 
@@ -602,7 +747,7 @@ and Patrick McManus.</t>
 <front>
 <title>Representing DNS Messages in JSON</title>
 
-<author initials='P' surname='Hoffman' fullname='Paul E. Hoffman'>
+<author initials='P' surname='Hoffman' fullname='Paul Hoffman'>
     <organization />
 </author>
 
@@ -619,6 +764,27 @@ and Patrick McManus.</t>
 
 
 
+<reference anchor='I-D.nottingham-json-home'>
+<front>
+<title>Home Documents for HTTP APIs</title>
+
+<author initials='M' surname='Nottingham' fullname='Mark Nottingham'>
+    <organization />
+</author>
+
+<date month='May' day='22' year='2016' />
+
+<abstract><t>This document proposes a "home document" format for non-browser HTTP clients.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-nottingham-json-home-04' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-nottingham-json-home-04.txt' />
+</reference>
+
+
+
 <reference anchor='I-D.song-dns-wireformat-http'>
 <front>
 <title>DNS wire-format over HTTP</title>
@@ -627,7 +793,7 @@ and Patrick McManus.</t>
     <organization />
 </author>
 
-<author initials='P' surname='Vixie' fullname='Paul A. Vixie'>
+<author initials='P' surname='Vixie' fullname='Paul Vixie'>
     <organization />
 </author>
 
@@ -655,6 +821,25 @@ and Patrick McManus.</t>
 
     </references>
 
+
+<section anchor="previous-work-on-dns-over-http-or-in-other-formats" title="Previous Work on DNS over HTTP or in Other Formats">
+
+<t>The following is a list of earlier work that related to DNS over HTTP or representing DNS
+data in other formats. It is very likely incomplete, but will be expanded as this document
+progresses.</t>
+
+<t>The list includes links to the tools.ietf.org site (because these documents
+are all expired) and web sites of software.</t>
+
+<t><list style="symbols">
+  <t>https://www.nlnetlabs.nl/projects/dnssec-trigger/</t>
+  <t>https://tools.ietf.org/html/draft-mohan-dns-query-xml</t>
+  <t>https://tools.ietf.org/html/draft-daley-dnsxml</t>
+  <t>https://tools.ietf.org/html/draft-dulaunoy-dnsop-passive-dns-cof</t>
+  <t>https://tools.ietf.org/html/draft-bortzmeyer-dns-json</t>
+</list></t>
+
+</section>
 
 
   </back>

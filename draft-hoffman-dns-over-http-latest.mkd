@@ -31,13 +31,16 @@ author:
 normative:
   RFC1035:
   RFC2119:
+  RFC4035:
   RFC5246:
+  RFC6570:
   RFC7230:
   RFC7232:
-  I-D.nottingham-json-home:
+  RFC7553:
 
 informative:
   RFC5001:
+  RFC6106:
   RFC6147:
   RFC6891:
   RFC6975:
@@ -48,10 +51,12 @@ informative:
   RFC7540:
   RFC7830:
   RFC7871:
+  I-D.hamilton-early-deployment-quic:
   I-D.hildebrand-deth:
   I-D.hoffman-dns-in-json:
+  I-D.nottingham-json-home:
   I-D.song-dns-wireformat-http:
-    
+
 --- abstract
 
 This document describes how to make DNS queries and get DNS responses over HTTPS. The main
@@ -93,7 +98,7 @@ can be configured, hard-coded, or discoverable such as through DHCP.
 Another use case is an operating system that wants to help applications when the OS
 detects broken DNS in its operations. The OS can still respond to calls such as
 getaddrinfo() and gethostbyname() by using this protocol without the applications
-needing to do anything. 
+needing to do anything.
 
 A more recent use case is a small ("IoT") device that already runs COAP {{RFC7252}} and
 has a JSON {{RFC7159}} or CBOR {{RFC7049}} parser and wants to make DNS queries beyond what
@@ -103,9 +108,10 @@ An eventual use case might be editing of DNS zones by end users, such as describ
 {{I-D.hildebrand-deth}}. Such editing could easily be done using existing HTTP
 semantics.
 
-As HTTP/2 {{RFC7540}} becomes more widely deployed, this use case might become more important
-because an HTTP/2 server might push DNS responses to a client that the HTTP/2 server expects
-the client to look up.
+As HTTP/2 {{RFC7540}} and QUIC {{I-D.hamilton-early-deployment-quic}} become
+more widely deployed, this protocols might become more important because an
+HTTP/2 or QUIC server might push DNS responses to a client that the HTTP/2 server
+expects the client to look up.
 
 
 ## Protocol Requirements
@@ -128,8 +134,10 @@ The protocol described here bases its design on the following protocol requireme
   including those not yet defined. Further, it must be easy to define different
   response formats and to extend already-defined formats.
 
-A non-requirement for this protocol is that is needs to work with DNS64 {{RFC6147}}.
+Non-requirements:
 
+* Supporting network-specific DNS64 {{RFC6147}}
+* Supporting other network-specific inferences from plaintext DNS queries
 
 ## Terminology
 
@@ -137,100 +145,110 @@ In this document, the key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL 
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as
 described in BCP 14, RFC 2119 {{RFC2119}}.
 
+## Template
 
-## Queries
-
-The DNS API client finds a DNS API server through the same mechanism as for a DNS resolver:
-DHCPv4, DHCPv6, IPv6 RA, and configuration. The DNS API client then discovers the server's
-capabilities and URI temple using the mechanism described in {{discovery}}. The URI
-templates used in this protocol MUST be "https:" or "coaps:" for the scheme.
-
-To send a DNS query, the DNS API client prepares an HTTP GET request and sends it to the
-URI it received from the discovery step. The query is encoded as a set of name/value
-components using the HTTP "?name=value" syntax, with an "&" character between each pair.
-Names and values are defined in {{names_values}}.
-
-The HTTP-related requirements include:
-
-* The HTTP GET request MUST have no body.
-
-* The HTTP GET request SHOULD be sent with an HTTP "Accept:" header to say what
-type of content can be returned. If the request does not have an HTTP "Accept:" header, the
-DNS API server might return a content type that the DNS API client does not understand.
-
-* The HTTP GET request SHOULD use If-None-Match headers if earlier responses to the same
-query used HTTP ETag headers as described in {{RFC7232}}.
-
-
-For example, assume that the server's template for the query is:
+The URI template (see {{RFC6570}}) for DNS API queries is:
 
 ~~~
-   https://dnsserver.example.com/
+{PREFIX}{QNAME}/{QTYPE}
 ~~~
 
-A query for the A records for www.somecompany.com would be:
+{{I-D.nottingham-json-home}} will be evaluated in the future to see if the
+added complexity of including it in the discovery process would make for an
+interesting increase in deployment flexibility.
 
-~~~
-   https://dnsserver.example.com/?qn=www.somecompany.com&qt=1
-~~~
+The following variables are used to expand the URI template.
 
-The HTTP request might look like:
+### PREFIX
 
-~~~
-   GET /?qn=www.somecompany.com&qt=1 HTTP/1.1
-   User-Agent: curl/7.16.3 libcurl/7.16.3
-   Host: dnsserver.example.com
-   Accept: application/dns+json
-~~~
+"PREFIX" will be a URI fragment, such as "https://example.net/api/".  The URI
+protocol MUST be "https:" or "coaps:".
 
-This document only defines the semantics of the HTTP GET command for normal DNS
-queries and responses. Other verbs will be defined in the future.  Other verbs will likely
-need different authorization semantics as well as different discoverability for the
-template. For example, see {{I-D.hildebrand-deth}}.
+The DNS API client discovers the PREFIX for the DNS API through the same
+mechanism as for a DNS resolver: DHCPv4, DHCPv6, IPv6 RA, and configuration.
+Specific PREFIX discovery mechanisms will be defined later, but imagine a new RA
+option like that in {{RFC6106}} that gives a PREFIX.
+
+If no PREFIX is configured as above, the client MAY query their existing DNS
+server for API support by doing a URI query (see {{RFC7553}}) to the domain
+"_dnsapi.invalid".  If the DNS server knows about API support, the resulting
+URI will be the PREFIX.
+
+The response to this discovery might be multiple PREFIXes. In that
+case, some of the URI types might not be supported by the resolver; this is
+fine as long as at least one type is.  For example, if a discovery query returns
+both https: and coaps: URI templates, but the DNS API client can only generate
+https: queries, the other URI templates are ignored.
+
+Note: there are several concerns to be worked out with respect to the PREFIX,
+including how to bootstrap PREFIXes that contain domain names, and how to trust
+TLS connections to PREFIXes that contain only IP addresses in a deployable way.
+Some ideas might come from RFC 7858.
+
+Note: The discovery response may give hints that the DNS API server requires a
+form of HTTP authorization. The configuration of that authorization is out of
+scope for the DNS API protocol. TODO: Need to think about HTTP authorization
+mechanisms. This would allow user tracking, but could also free resolvers from
+having to use IP address ranges for filtering.  Several bad ideas are likely
+here, so let's think about it early.
 
 
-## Query Names and Values {#names_values}
+### QNAME
 
-The following are the names and descriptions of values for DNS API queries. Every query
-MUST have a "qn" component and a "qt" component; all other components are optional.
-DNS header values and extensions that are not appropriate for queries are not
-defined.
+The QNAME from {{RFC1035}}.
 
-Note that a query can only include a single qn and a single qt component. Although it may
-be tempting to include multiple qt components (such as a single query for A and AAAA
-records), DNS implementations historically have not dealt consistently with these. If
-there are future standards for queries for multiple names and types, new components for
-those standards can be defined.
+Note: An open issue exists with how to encode non-ASCII QNAMEs.  There are
+several options:
 
-qn:
-: QNAME from RFC 1035
+* Punycode all labels before sending
+* Send the UTF8-encoded version after normalization, but before Punycoding
+* Send generic UTF8-encoded labels, and make the server do normalization
 
-qt:
-: QTYPE from RFC 1035
+### QTYPE
+
+The numerical QTYPE from {{RFC1035}}.
+
+Note: there are some people that want to use the string forms, such as "AAAA",
+perhaps in addition to the numerical form.  To be discussed.
+
+## Additional Parameters {#parameters}
+
+The following are the names and descriptions of parameters for DNS API queries.
+All parameters are optional. DNS header values and extensions that are not
+appropriate for queries are not defined.  Each parameter in the list below will
+need to include a use case in a later version of this document; this list is a
+first approximation of what may be needed.
+
+Each of these parameters may be used in a query component of the URI sent
+to the API, to modify the request.
 
 qc:
-: QCLASS from RFC 1035 -- if omitted, server assumes 1
+: QCLASS from {{RFC1035}} -- if omitted, server assumes 1 (IN).  Might be needed
+  to support legacy DNS classes, or to access interesting new DNS capabilities.
 
 id:
-: ID from RFC 1035 -- if omitted, there is no default value
+: ID from {{RFC1035}} -- if omitted, there is no default value.  Could be used
+  to track responses.
 
 opcode:
-: Opcode from RFC 1035 --  if omitted, server assumes 0
+: Opcode from {{RFC1035}} --  if omitted, server assumes 0 (standard query)
 
 rd:
-: RD from RFC 1035 -- if omitted, server assumes 1
+: RD from {{RFC1035}} -- if omitted, server assumes 1 (recursion desired)
 
 cd:
-: CD from RFC 4035 -- if omitted, server assumes 0
+: CD from {{RFC4035}} -- if omitted, server assumes 1 (DNSSec checking
+  by the resolver disabled)
 
 do:
-: DO from RFC 4035 -- if omitted, server assumes 1
+: DO from {{RFC4035}} -- if omitted, server assumes 1 (include RRSIG RDATA
+  in the response)
 
 The following are EDNS0 {{RFC6891}} extensions. If an extension is omitted, the server
 assumes that the extension was not given in the request.
 
 nsid:
-: Request the server's NSID, based on {{RFC5001}}
+: Request the server's NSID, based on {{RFC5001}}.  Set to "1" to enable.
 
 dau:
 : Specify the list of signing algorithms understood, based on {{RFC6975}}.
@@ -251,35 +269,58 @@ encoded in lowercase hexadecimal.
 
 pad:
 : Optional padding, used for the same purposes as described in {{RFC7830}}.
-
+  This can be used to normalize the length of queries.
 
 See {{ianacons}} for a registry for additional names for queries.
 
+## Queries
 
-## Discovery {#discovery}
+To send a DNS query, the DNS API client prepares an HTTP/CoAP GET request using
+the template (see {{template}}).  If any additional parameters
+(see {{parameters}}) are desired, they are appended to the template in typical
+HTTPS URI fashion, using a "?" (U+003F: QUESTION MARK), then each parameter
+specified as a name, "=" (U+003D: EQUALS SIGN), and value, each name=value pair
+separated by a "&" (U+0026: AMPERSAND).  Each value should be percent-encoded
+as needed.
 
-A DNS API client discovers the capabilities of the DNS API server using
-{{I-D.nottingham-json-home}}. For queries, the link relation is TBD.
+The HTTP-related requirements include:
 
-Note that the response to this discover might be multiple templates. In those templates,
-some of the URI types might not be supported by the resolver; this is fine as long as at
-least one type is.  For example, if a discovery query returns both https: and coaps: URI
-templates, but the DNS API client can only generate https: queries, the other URI
-templates are ignored.
+* The HTTP GET request MUST have no body.
 
-If a DNS API client only has a DNS resolver address but no configuration for a DNS API
-server, the client can still use the discovery query to see if that DNS resolver is acting
-as a DNS API server. That is, some DNS resolvers will run both the DNS protocol on port 53
-and the DNS API on a different port.
+* The HTTP GET request SHOULD be sent with an HTTP "Accept:" header to say what
+type of content can be returned. If the request does not have an HTTP "Accept:" header, the
+DNS API server might return a content type that the DNS API client does not understand.
 
-The discovery response may give hints that the DSN API server requires a form of HTTP
-authorization. The configuration of that authorization is out of scope for the DNS API
-protocol. TODO: Need to think about HTTP authorization mechanisms. This would allow user
-tracking, but could also free resolvers from having to use IP address ranges for
-filtering.  Several bad ideas are likely here, so let's think about it early.
+* The HTTP GET request SHOULD use If-None-Match headers if earlier responses to the same
+query used HTTP ETag headers as described in {{RFC7232}}.
 
-TODO: Need to think about how to get both an IP address and domain name for
-the SNI for HTTPS. Some ideas might come from RFC 7858.
+
+For example, assume that the server's PREFIX is:
+
+~~~
+   https://dnsserver.example.net/
+~~~
+
+A query for the A records for "www.example.com" with three z's used as padding
+would be:
+
+~~~
+   https://dnsserver.example.net/www.example.com/1?pad=zzz
+~~~
+
+The HTTP request might look like:
+
+~~~
+   GET www.example.com/1?pad=zzz HTTP/1.1
+   User-Agent: curl/7.16.3 libcurl/7.16.3
+   Host: dnsserver.example.net
+   Accept: application/dns+json
+~~~
+
+This document only defines the semantics of the HTTP/CoAP GET command for normal
+DNS queries and responses. Other verbs will be defined in the future.  Other
+verbs will likely need different authorization semantics.
+For example, see {{I-D.hildebrand-deth}}.
 
 
 Responses

@@ -1,10 +1,13 @@
 DRAFT=draft-hoffman-dns-over-http-latest
-all: $(DRAFT).txt
+all: $(DRAFT).txt $(DRAFT).html
 
 .PRECIOUS: $(DRAFT).xml
 
 %.txt: %.xml
 	xml2rfc $<
+
+%.html: %.xml
+	xml2rfc --html $<
 
 %.xml: %.mkd
 	kramdown-rfc2629 $< >$@.new
