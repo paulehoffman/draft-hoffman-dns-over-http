@@ -203,7 +203,10 @@ Internet-Draft                 DNS in JSON                September 2016
 2.1.  PREFIX
 
    "PREFIX" will be a URI fragment, such as "https://example.net/api/".
-   The URI protocol MUST be "https:" or "coaps:".
+   The URI protocol MUST be "https:" or "coaps:".  The prefix MUST NOT
+   contain the character "?", and MUST be suitable for processing using
+   the above template.  Often, this will mean that the template should
+   end with a "/" (U+002F: SOLIDUS).
 
    The DNS API client discovers the PREFIX for the DNS API through the
    same mechanism as for a DNS resolver: DHCPv4, DHCPv6, IPv6 RA, and
@@ -216,9 +219,6 @@ Internet-Draft                 DNS in JSON                September 2016
    the DNS server knows about API support, the returned URI will be the
    PREFIX.
 
-   The response to this discovery might be multiple PREFIXes.  In that
-   case, some of the URI types might not be supported by the resolver;
-
 
 
 Hoffman & Hildebrand     Expires March 23, 2017                 [Page 4]
@@ -226,6 +226,8 @@ Hoffman & Hildebrand     Expires March 23, 2017                 [Page 4]
 Internet-Draft                 DNS in JSON                September 2016
 
 
+   The response to this discovery might be multiple PREFIXes.  In that
+   case, some of the URI types might not be supported by the resolver;
    this is fine as long as at least one type is.  For example, if a
    discovery query returns both https: and coaps: URI templates, but the
    DNS API client can only generate https: queries, the other URI
@@ -272,8 +274,6 @@ Internet-Draft                 DNS in JSON                September 2016
    Note: there are some people that want to use the string forms, such
    as "AAAA", perhaps in addition to the numerical form.  To be
    discussed.
-
-
 
 
 
@@ -359,7 +359,8 @@ Internet-Draft                 DNS in JSON                September 2016
    template in typical HTTPS URI fashion, using a "?"  (U+003F: QUESTION
    MARK), then each parameter specified as a name, "=" (U+003D: EQUALS
    SIGN), and value, each name=value pair separated by a "&" (U+0026:
-   AMPERSAND).  Each value should be percent-encoded as needed.
+   AMPERSAND).  Each value should be percent-encoded as needed.  The
+   client MUST ensure that the resulting URI is valid.
 
    The HTTP-related requirements include:
 
@@ -376,15 +377,14 @@ Internet-Draft                 DNS in JSON                September 2016
 
    For example, assume that the server's PREFIX is:
 
-      https://dnsserver.example.net/api1
+      https://dnsserver.example.net/api/v1/
 
    A query for the A records for "www.example.com" with recursion turned
    off would be:
 
-      https://dnsserver.example.net/api1/www.example.com/1?rd=0
+      https://dnsserver.example.net/api/v1/www.example.com/1?rd=0
 
    The HTTP request might look like:
-
 
 
 
@@ -394,7 +394,7 @@ Hoffman & Hildebrand     Expires March 23, 2017                 [Page 7]
 Internet-Draft                 DNS in JSON                September 2016
 
 
-      GET api1/www.example.com/1?rd=0 HTTP/1.1
+      GET api/v1/www.example.com/1?rd=0 HTTP/1.1
       User-Agent: curl/7.16.3 libcurl/7.16.3
       Host: dnsserver.example.net
       Accept: application/dns+json

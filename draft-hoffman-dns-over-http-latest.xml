@@ -149,7 +149,9 @@ interesting increase in deployment flexibility.</t>
 <section anchor="prefix" title="PREFIX">
 
 <t>“PREFIX” will be a URI fragment, such as “https://example.net/api/”.  The URI
-protocol MUST be “https:” or “coaps:”.</t>
+protocol MUST be “https:” or “coaps:”.  The prefix MUST NOT contain the
+character “?”, and MUST be suitable for processing using the above template.
+Often, this will mean that the template should end with a “/” (U+002F: SOLIDUS).</t>
 
 <t>The DNS API client discovers the PREFIX for the DNS API through the same
 mechanism as for a DNS resolver: DHCPv4, DHCPv6, IPv6 RA, and configuration.
@@ -273,7 +275,7 @@ the template (see <xref target="template"/>).  If any additional parameters
 HTTPS URI fashion, using a “?” (U+003F: QUESTION MARK), then each parameter
 specified as a name, “=” (U+003D: EQUALS SIGN), and value, each name=value pair
 separated by a “&amp;” (U+0026: AMPERSAND).  Each value should be percent-encoded
-as needed.</t>
+as needed.  The client MUST ensure that the resulting URI is valid.</t>
 
 <t>The HTTP-related requirements include:</t>
 
@@ -289,20 +291,20 @@ query used HTTP ETag headers as described in <xref target="RFC7232"/>.</t>
 <t>For example, assume that the server’s PREFIX is:</t>
 
 <figure><artwork><![CDATA[
-   https://dnsserver.example.net/api1
+   https://dnsserver.example.net/api/v1/
 ]]></artwork></figure>
 
 <t>A query for the A records for “www.example.com” with recursion turned off
 would be:</t>
 
 <figure><artwork><![CDATA[
-   https://dnsserver.example.net/api1/www.example.com/1?rd=0
+   https://dnsserver.example.net/api/v1/www.example.com/1?rd=0
 ]]></artwork></figure>
 
 <t>The HTTP request might look like:</t>
 
 <figure><artwork><![CDATA[
-   GET api1/www.example.com/1?rd=0 HTTP/1.1
+   GET api/v1/www.example.com/1?rd=0 HTTP/1.1
    User-Agent: curl/7.16.3 libcurl/7.16.3
    Host: dnsserver.example.net
    Accept: application/dns+json

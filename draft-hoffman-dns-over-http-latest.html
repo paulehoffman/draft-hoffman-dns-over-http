@@ -519,7 +519,7 @@
 <p><a href="#I-D.nottingham-json-home">[I-D.nottingham-json-home]</a> will be evaluated in the future to see if the added complexity of including it in the discovery process would make for an interesting increase in deployment flexibility.</p>
 <p id="rfc.section.2.p.3">The following variables are used to expand the URI template.</p>
 <h1 id="rfc.section.2.1"><a href="#rfc.section.2.1">2.1.</a> <a href="#prefix" id="prefix">PREFIX</a></h1>
-<p id="rfc.section.2.1.p.1">&#8220;PREFIX&#8221; will be a URI fragment, such as &#8220;https://example.net/api/&#8221;.  The URI protocol MUST be &#8220;https:&#8221; or &#8220;coaps:&#8221;.</p>
+<p id="rfc.section.2.1.p.1">&#8220;PREFIX&#8221; will be a URI fragment, such as &#8220;https://example.net/api/&#8221;.  The URI protocol MUST be &#8220;https:&#8221; or &#8220;coaps:&#8221;.  The prefix MUST NOT contain the character &#8220;?&#8221;, and MUST be suitable for processing using the above template.  Often, this will mean that the template should end with a &#8220;/&#8221; (U+002F: SOLIDUS).</p>
 <p id="rfc.section.2.1.p.2">The DNS API client discovers the PREFIX for the DNS API through the same mechanism as for a DNS resolver: DHCPv4, DHCPv6, IPv6 RA, and configuration.  Specific PREFIX discovery mechanisms will be defined later, but imagine a new DHCP or RA option that gives a PREFIX.</p>
 <p id="rfc.section.2.1.p.3">If no PREFIX is configured as above, the client MAY query their existing DNS server for API support by doing a DNS queury query for the URI RRtype (see <a href="#RFC7553">[RFC7553]</a>) to the domain &#8220;_dnsapi.invalid&#8221;.  If the DNS server knows about API support, the returned URI will be the PREFIX.</p>
 <p id="rfc.section.2.1.p.4">The response to this discovery might be multiple PREFIXes. In that case, some of the URI types might not be supported by the resolver; this is fine as long as at least one type is.  For example, if a discovery query returns both https: and coaps: URI templates, but the DNS API client can only generate https: queries, the other URI templates are ignored.</p>
@@ -577,7 +577,7 @@
 </dl>
 <p id="rfc.section.2.4.p.6">See <a href="#ianacons">Section 5</a> for a registry for additional names for queries.</p>
 <h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#queries" id="queries">Queries</a></h1>
-<p id="rfc.section.3.p.1">To send a DNS query, the DNS API client prepares an HTTP/CoAP GET request using the template (see <a href="#template">Section 2</a>).  If any additional parameters (see <a href="#parameters">Section 2.4</a>) are desired, they are appended to the template in typical HTTPS URI fashion, using a &#8220;?&#8221; (U+003F: QUESTION MARK), then each parameter specified as a name, &#8220;=&#8221; (U+003D: EQUALS SIGN), and value, each name=value pair separated by a &#8220;&amp;&#8221; (U+0026: AMPERSAND).  Each value should be percent-encoded as needed.</p>
+<p id="rfc.section.3.p.1">To send a DNS query, the DNS API client prepares an HTTP/CoAP GET request using the template (see <a href="#template">Section 2</a>).  If any additional parameters (see <a href="#parameters">Section 2.4</a>) are desired, they are appended to the template in typical HTTPS URI fashion, using a &#8220;?&#8221; (U+003F: QUESTION MARK), then each parameter specified as a name, &#8220;=&#8221; (U+003D: EQUALS SIGN), and value, each name=value pair separated by a &#8220;&amp;&#8221; (U+0026: AMPERSAND).  Each value should be percent-encoded as needed.  The client MUST ensure that the resulting URI is valid.</p>
 <p id="rfc.section.3.p.2">The HTTP-related requirements include:</p>
 <p/>
 
@@ -588,15 +588,15 @@
 </ul>
 <p id="rfc.section.3.p.4">For example, assume that the server&#8217;s PREFIX is:</p>
 <pre>
-   https://dnsserver.example.net/api1
+   https://dnsserver.example.net/api/v1/
 </pre>
 <p id="rfc.section.3.p.5">A query for the A records for &#8220;www.example.com&#8221; with recursion turned off would be:</p>
 <pre>
-   https://dnsserver.example.net/api1/www.example.com/1?rd=0
+   https://dnsserver.example.net/api/v1/www.example.com/1?rd=0
 </pre>
 <p id="rfc.section.3.p.6">The HTTP request might look like:</p>
 <pre>
-   GET api1/www.example.com/1?rd=0 HTTP/1.1
+   GET api/v1/www.example.com/1?rd=0 HTTP/1.1
    User-Agent: curl/7.16.3 libcurl/7.16.3
    Host: dnsserver.example.net
    Accept: application/dns+json

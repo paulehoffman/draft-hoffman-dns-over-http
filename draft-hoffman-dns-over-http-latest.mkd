@@ -65,8 +65,7 @@ of the responses.
 
 --- middle
 
-Introduction
-=======
+# Introduction
 
 Over time, there have been many proposals for using HTTP and HTTPS as a substrate for DNS
 queries and responses. To date, none of those proposals have made it beyond early
@@ -144,8 +143,7 @@ In this document, the key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL 
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as
 described in BCP 14, RFC 2119 {{RFC2119}}.
 
-Template
-=====
+# Template
 
 The URI template (see {{RFC6570}}) for DNS API queries is:
 
@@ -162,7 +160,9 @@ The following variables are used to expand the URI template.
 ## PREFIX
 
 "PREFIX" will be a URI fragment, such as "https://example.net/api/".  The URI
-protocol MUST be "https:" or "coaps:".
+protocol MUST be "https:" or "coaps:".  The prefix MUST NOT contain the
+character "?", and MUST be suitable for processing using the above template.
+Often, this will mean that the template should end with a "/" (U+002F: SOLIDUS).
 
 The DNS API client discovers the PREFIX for the DNS API through the same
 mechanism as for a DNS resolver: DHCPv4, DHCPv6, IPv6 RA, and configuration.
@@ -278,8 +278,7 @@ pad:
 
 See {{ianacons}} for a registry for additional names for queries.
 
-Queries
-=====
+# Queries
 
 To send a DNS query, the DNS API client prepares an HTTP/CoAP GET request using
 the template (see {{template}}).  If any additional parameters
@@ -287,7 +286,7 @@ the template (see {{template}}).  If any additional parameters
 HTTPS URI fashion, using a "?" (U+003F: QUESTION MARK), then each parameter
 specified as a name, "=" (U+003D: EQUALS SIGN), and value, each name=value pair
 separated by a "&" (U+0026: AMPERSAND).  Each value should be percent-encoded
-as needed.
+as needed.  The client MUST ensure that the resulting URI is valid.
 
 The HTTP-related requirements include:
 
@@ -304,20 +303,20 @@ query used HTTP ETag headers as described in {{RFC7232}}.
 For example, assume that the server's PREFIX is:
 
 ~~~
-   https://dnsserver.example.net/api1
+   https://dnsserver.example.net/api/v1/
 ~~~
 
 A query for the A records for "www.example.com" with recursion turned off
 would be:
 
 ~~~
-   https://dnsserver.example.net/api1/www.example.com/1?rd=0
+   https://dnsserver.example.net/api/v1/www.example.com/1?rd=0
 ~~~
 
 The HTTP request might look like:
 
 ~~~
-   GET api1/www.example.com/1?rd=0 HTTP/1.1
+   GET api/v1/www.example.com/1?rd=0 HTTP/1.1
    User-Agent: curl/7.16.3 libcurl/7.16.3
    Host: dnsserver.example.net
    Accept: application/dns+json
@@ -329,8 +328,7 @@ verbs will likely need different authorization semantics.
 For example, see {{I-D.hildebrand-deth}}.
 
 
-Responses
-=====
+# Responses
 
 Different response formats will provide more or less information from a DNS
 response. For example, one response type might include the information from the
@@ -349,16 +347,14 @@ In the HTTP responses, the HTTP cache headers are set to shortest DNS TTL in the
 The HTTP responses SHOULD set the HTTP ETag headers as described in {{RFC7232}}.
 
 
-IANA Considerations {#ianacons}
-=====
+# IANA Considerations {#ianacons}
 
 TODO: Create a new registry for option names for DNS queries.
 This will be a simple registry for new option names, probably with
 a designated expert.
 
 
-Security Considerations {#securitycons}
-=====
+# Security Considerations {#securitycons}
 
 This protocol requires the use of TLS for communication. If a client does not enforce
 authentication of the TLS server, the communication channel will be susceptible to many
@@ -368,16 +364,14 @@ TODO: Think about whether cross-origin resource sharing (CORS) applies to this
 protocol and, if so, how to specify it.
 
 
-Acknowledgements
-=====
+# Acknowledgements
 
 Early input to this document came from Mark Nottingham and
 and Patrick McManus.
 
 --- back
 
-Previous Work on DNS over HTTP or in Other Formats
-=====
+# Previous Work on DNS over HTTP or in Other Formats
 
 The following is a list of earlier work that related to DNS over HTTP or representing DNS
 data in other formats. It is very likely incomplete, but will be expanded as this document
