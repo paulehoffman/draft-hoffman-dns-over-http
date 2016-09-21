@@ -28,7 +28,7 @@
       </address>
     </author>
 
-    <date year="2016" month="September" day="19"/>
+    <date year="2016" month="September" day="20"/>
 
     <area>Internet</area>
     
@@ -803,11 +803,11 @@ progresses.</t>
 are all expired) and web sites of software.</t>
 
 <t><list style="symbols">
-  <t>https://www.nlnetlabs.nl/projects/dnssec-trigger/</t>
   <t>https://tools.ietf.org/html/draft-mohan-dns-query-xml</t>
   <t>https://tools.ietf.org/html/draft-daley-dnsxml</t>
   <t>https://tools.ietf.org/html/draft-dulaunoy-dnsop-passive-dns-cof</t>
   <t>https://tools.ietf.org/html/draft-bortzmeyer-dns-json</t>
+  <t>https://www.nlnetlabs.nl/projects/dnssec-trigger/</t>
 </list></t>
 
 </section>

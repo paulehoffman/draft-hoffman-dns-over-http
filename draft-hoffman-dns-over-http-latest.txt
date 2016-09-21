@@ -5,11 +5,11 @@
 Network Working Group                                         P. Hoffman
 Internet-Draft                                                     ICANN
 Intended status: Standards Track                           J. Hildebrand
-Expires: March 23, 2017                               September 19, 2016
+Expires: March 24, 2017                               September 20, 2016
 
 
                          DNS Queries over HTTPS
-                      draft-hoffman-dns-over-http
+                      draft-hoffman-dns-over-http-00
 
 Abstract
 
@@ -34,7 +34,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 23, 2017.
+   This Internet-Draft will expire on March 24, 2017.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                 [Page 1]
+Hoffman & Hildebrand     Expires March 24, 2017                 [Page 1]
 
 Internet-Draft                 DNS in JSON                September 2016
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                 [Page 2]
+Hoffman & Hildebrand     Expires March 24, 2017                 [Page 2]
 
 Internet-Draft                 DNS in JSON                September 2016
 
@@ -165,7 +165,7 @@ Internet-Draft                 DNS in JSON                September 2016
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                 [Page 3]
+Hoffman & Hildebrand     Expires March 24, 2017                 [Page 3]
 
 Internet-Draft                 DNS in JSON                September 2016
 
@@ -221,7 +221,7 @@ Internet-Draft                 DNS in JSON                September 2016
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                 [Page 4]
+Hoffman & Hildebrand     Expires March 24, 2017                 [Page 4]
 
 Internet-Draft                 DNS in JSON                September 2016
 
@@ -277,7 +277,7 @@ Internet-Draft                 DNS in JSON                September 2016
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                 [Page 5]
+Hoffman & Hildebrand     Expires March 24, 2017                 [Page 5]
 
 Internet-Draft                 DNS in JSON                September 2016
 
@@ -333,7 +333,7 @@ Internet-Draft                 DNS in JSON                September 2016
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                 [Page 6]
+Hoffman & Hildebrand     Expires March 24, 2017                 [Page 6]
 
 Internet-Draft                 DNS in JSON                September 2016
 
@@ -389,7 +389,7 @@ Internet-Draft                 DNS in JSON                September 2016
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                 [Page 7]
+Hoffman & Hildebrand     Expires March 24, 2017                 [Page 7]
 
 Internet-Draft                 DNS in JSON                September 2016
 
@@ -445,7 +445,7 @@ Internet-Draft                 DNS in JSON                September 2016
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                 [Page 8]
+Hoffman & Hildebrand     Expires March 24, 2017                 [Page 8]
 
 Internet-Draft                 DNS in JSON                September 2016
 
@@ -501,7 +501,7 @@ Internet-Draft                 DNS in JSON                September 2016
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                 [Page 9]
+Hoffman & Hildebrand     Expires March 24, 2017                 [Page 9]
 
 Internet-Draft                 DNS in JSON                September 2016
 
@@ -557,7 +557,7 @@ Internet-Draft                 DNS in JSON                September 2016
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                [Page 10]
+Hoffman & Hildebrand     Expires March 24, 2017                [Page 10]
 
 Internet-Draft                 DNS in JSON                September 2016
 
@@ -602,23 +602,23 @@ Appendix A.  Previous Work on DNS over HTTP or in Other Formats
    The list includes links to the tools.ietf.org site (because these
    documents are all expired) and web sites of software.
 
-   o  https://www.nlnetlabs.nl/projects/dnssec-trigger/
-
    o  https://tools.ietf.org/html/draft-mohan-dns-query-xml
 
    o  https://tools.ietf.org/html/draft-daley-dnsxml
 
    o  https://tools.ietf.org/html/draft-dulaunoy-dnsop-passive-dns-cof
 
+   o  https://tools.ietf.org/html/draft-bortzmeyer-dns-json
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                [Page 11]
+
+Hoffman & Hildebrand     Expires March 24, 2017                [Page 11]
 
 Internet-Draft                 DNS in JSON                September 2016
 
 
-   o  https://tools.ietf.org/html/draft-bortzmeyer-dns-json
+   o  https://www.nlnetlabs.nl/projects/dnssec-trigger/
 
 Authors' Addresses
 
@@ -669,4 +669,4 @@ Authors' Addresses
 
 
 
-Hoffman & Hildebrand     Expires March 23, 2017                [Page 12]
+Hoffman & Hildebrand     Expires March 24, 2017                [Page 12]

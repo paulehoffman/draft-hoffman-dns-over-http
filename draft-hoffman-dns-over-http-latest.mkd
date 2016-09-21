@@ -380,8 +380,6 @@ progresses.
 The list includes links to the tools.ietf.org site (because these documents
 are all expired) and web sites of software.
 
-* https://www.nlnetlabs.nl/projects/dnssec-trigger/
-
 * https://tools.ietf.org/html/draft-mohan-dns-query-xml
 
 * https://tools.ietf.org/html/draft-daley-dnsxml
@@ -389,3 +387,5 @@ are all expired) and web sites of software.
 * https://tools.ietf.org/html/draft-dulaunoy-dnsop-passive-dns-cof
 
 * https://tools.ietf.org/html/draft-bortzmeyer-dns-json
+
+* https://www.nlnetlabs.nl/projects/dnssec-trigger/
