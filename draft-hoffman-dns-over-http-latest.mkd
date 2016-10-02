@@ -63,6 +63,32 @@ driver for this document is to allow clients who want to send DNS queries over H
 transport to be able to do in a secure and interoperable fashion, regardless of the format
 of the responses.
 
+<!--  ################## Notes between Joe and Paul will go here ######################
+
+* Add text in the intro saying that this is meant to work with recursive *and* authoritative servers
+   May need to clear up discovery for this
+
+* Use a .well_known URI instead of a query to "_dnsapi.invalid"
+   Also, .invalid is a bad choice due to 6761
+
+* Add a TODO about server push to be filled in by other folks
+
+* Martin wants us to relate caching more to the TTL
+
+* Julian wants to know where to send comments
+
+* Remove "typical" in description of how the options are added, or cite the appropriate part of the HTML spec
+
+* Mention that Accept: is nothing special here, and it only suggests what you want
+
+* Have an MTI response type of JSON
+
+* TBD on how caching and TTLs affect H2 push
+
+* Add advice on how to create etags
+
+-->
+
 --- middle
 
 # Introduction
