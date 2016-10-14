@@ -36,10 +36,16 @@ normative:
   RFC6570:
   RFC7230:
   RFC7232:
-  RFC7553:
+  HTMLSPEC:
+    author:
+      org: W3C
+    date: 2016
+    title: HTML5, A vocabulary and associated APIs for HTML and XHTML
+    target: https://www.w3.org/TR/html5/
 
 informative:
   RFC5001:
+  RFC5785:
   RFC6147:
   RFC6891:
   RFC6975:
@@ -63,29 +69,10 @@ driver for this document is to allow clients who want to send DNS queries over H
 transport to be able to do in a secure and interoperable fashion, regardless of the format
 of the responses.
 
+Comments on this draft can be sent to the dnsoverhttp mailing list at
+<https://www.ietf.org/mailman/listinfo/dnsoverhttp>.
+
 <!--  ################## Notes between Joe and Paul will go here ######################
-
-* Add text in the intro saying that this is meant to work with recursive *and* authoritative servers
-   May need to clear up discovery for this
-
-* Use a .well_known URI instead of a query to "_dnsapi.invalid"
-   Also, .invalid is a bad choice due to 6761
-
-* Add a TODO about server push to be filled in by other folks
-
-* Martin wants us to relate caching more to the TTL
-
-* Julian wants to know where to send comments
-
-* Remove "typical" in description of how the options are added, or cite the appropriate part of the HTML spec
-
-* Mention that Accept: is nothing special here, and it only suggests what you want
-
-* Have an MTI response type of JSON
-
-* TBD on how caching and TTLs affect H2 push
-
-* Add advice on how to create etags
 
 -->
 
@@ -133,9 +120,14 @@ An eventual use case might be editing of DNS zones by end users, such as describ
 semantics.
 
 As HTTP/2 {{RFC7540}} and QUIC {{I-D.hamilton-early-deployment-quic}} become
-more widely deployed, this protocols might become more important because an
+more widely deployed, this protocol might become more important because an
 HTTP/2 or QUIC server might push DNS responses to a client that the HTTP/2 server
 expects the client to look up.
+This will be covered in {{h2}}. TODO: this discussion of H2 push needs to be expanded by people with this use case.
+
+These use cases assume that the server is a resolver, but this protocol can certainly be
+used in use cases where the server is an authoritative server. Such use cases may be added
+to this document, or may be documented later.
 
 
 ## Protocol Requirements
@@ -195,9 +187,14 @@ mechanism as for a DNS resolver: DHCPv4, DHCPv6, IPv6 RA, and configuration.
 Specific PREFIX discovery mechanisms will be defined later, but imagine a new DHCP or RA
 option that gives a PREFIX.
 
-If no PREFIX is configured as above, the client MAY query their existing DNS
-server for API support by doing a DNS queury query for the URI RRtype (see {{RFC7553}}) to the domain
-"_dnsapi.invalid".  If the DNS server knows about API support, the returned
+If no PREFIX is configured as above, the client MAY query 
+a DNS resolver for which they have an IP address. The query is
+
+~~~
+   https://<IPADDRESS>/.well_known/TBD1
+~~~
+
+If the DNS server knows about API support, the returned
 URI will be the PREFIX.
 
 The response to this discovery might be multiple PREFIXes. In that
@@ -206,7 +203,7 @@ fine as long as at least one type is.  For example, if a discovery query returns
 both https: and coaps: URI templates, but the DNS API client can only generate
 https: queries, the other URI templates are ignored.
 
-Note: there are several concerns to be worked out with respect to the PREFIX,
+TODO: there are several concerns to be worked out with respect to the PREFIX,
 including how to bootstrap PREFIXes that contain domain names, and how to trust
 TLS connections to PREFIXes that contain only IP addresses in a deployable way.
 Some ideas might come from RFC 7858.
@@ -221,9 +218,9 @@ here, so let's think about it early.
 
 ## QNAME
 
-The QNAME from {{RFC1035}}.
+The QNAME is adopted from {{RFC1035}}.
 
-Note: An open issue exists with how to encode non-ASCII domain names.
+TODO: how to encode non-ASCII domain names.
 For IDNs, there are
 several options:
 
@@ -231,15 +228,15 @@ several options:
 * Send the UTF8-encoded version after normalization, but before Punycoding
 * Send generic UTF8-encoded labels, and make the server do normalization
 
-There is also a question about domain names (not host names) that have values
+TODO: domain names (not host names) that have values
 that might cause problems in the URI format, such as values that are control
 characters in ASCII, and values greater than 127.
 
 ## QTYPE
 
-The numerical QTYPE from {{RFC1035}}.
+The numerical QTYPE is adopted from {{RFC1035}}.
 
-Note: there are some people that want to use the string forms, such as "AAAA",
+TODO: there are some people that want to use the string forms, such as "AAAA",
 perhaps in addition to the numerical form.  To be discussed.
 
 ## Additional Parameters {#parameters}
@@ -304,22 +301,25 @@ pad:
 
 See {{ianacons}} for a registry for additional names for queries.
 
-# Queries
+# Queries {#queries}
 
 To send a DNS query, the DNS API client prepares an HTTP/CoAP GET request using
 the template (see {{template}}).  If any additional parameters
-(see {{parameters}}) are desired, they are appended to the template in typical
-HTTPS URI fashion, using a "?" (U+003F: QUESTION MARK), then each parameter
+(see {{parameters}}) are desired, they are appended to the template
+as if they are HTML form data. (See Sections 4.10.22.3  and 4.10.22.4 of {{HTMLSPEC}} for
+the full specification of form data.)
+Typically, this is done using a "?" (U+003F: QUESTION MARK), then each parameter
 specified as a name, "=" (U+003D: EQUALS SIGN), and value, each name=value pair
-separated by a "&" (U+0026: AMPERSAND).  Each value should be percent-encoded
-as needed.  The client MUST ensure that the resulting URI is valid.
+separated by a "&" (U+0026: AMPERSAND). Each value should be percent-encoded
+as needed. The client MUST ensure that the resulting URI is valid.
 
 The HTTP-related requirements include:
 
 * The HTTP GET request MUST have no body.
 
 * The HTTP GET request SHOULD be sent with an HTTP "Accept:" header to say what
-type of content can be returned. If the request does not have an HTTP "Accept:" header, the
+type of content can be returned; of course, a server can return whatever type
+of content it wants. If the request does not have an HTTP "Accept:" header, the
 DNS API server might return a content type that the DNS API client does not understand.
 
 * The HTTP GET request SHOULD use If-None-Match headers if earlier responses to the same
@@ -354,7 +354,7 @@ verbs will likely need different authorization semantics.
 For example, see {{I-D.hildebrand-deth}}.
 
 
-# Responses
+# Responses {#responses}
 
 Different response formats will provide more or less information from a DNS
 response. For example, one response type might include the information from the
@@ -372,12 +372,27 @@ know response types include:
 In the HTTP responses, the HTTP cache headers are set to shortest DNS TTL in the response.
 The HTTP responses SHOULD set the HTTP ETag headers as described in {{RFC7232}}.
 
+TODO: Add more detail about setting the HTTP cache headers.
+
+TODO: Add examples of creating these ETag headers.
+
+Servers conforming to this protocol MUST implement responding with messages
+formatted with {{I-D.hoffman-dns-in-json}}.
+
+# Use in HTTP/2 {#h2}
+
+TODO: Full discussion about using this protocol in HTTP/2 for server push.
+This will also hopefully cover caching and DNS TTLs.
+
 
 # IANA Considerations {#ianacons}
 
 TODO: Create a new registry for option names for DNS queries.
 This will be a simple registry for new option names, probably with
 a designated expert.
+
+TODO: Replace TBD1 in the body with a string from the .well_known registry.
+Reference {{RFC5785}}.
 
 
 # Security Considerations {#securitycons}
