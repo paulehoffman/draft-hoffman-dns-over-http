@@ -5,11 +5,11 @@
 Network Working Group                                         P. Hoffman
 Internet-Draft                                                     ICANN
 Intended status: Standards Track                           J. Hildebrand
-Expires: March 24, 2017                               September 20, 2016
+Expires: April 17, 2017                                 October 14, 2016
 
 
                          DNS Queries over HTTPS
-                      draft-hoffman-dns-over-http-00
+                      draft-hoffman-dns-over-http
 
 Abstract
 
@@ -18,6 +18,9 @@ Abstract
    who want to send DNS queries over HTTP transport to be able to do in
    a secure and interoperable fashion, regardless of the format of the
    responses.
+
+   Comments on this draft can be sent to the dnsoverhttp mailing list at
+   https://www.ietf.org/mailman/listinfo/dnsoverhttp .
 
 Status of This Memo
 
@@ -34,7 +37,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 24, 2017.
+   This Internet-Draft will expire on April 17, 2017.
 
 Copyright Notice
 
@@ -47,16 +50,17 @@ Copyright Notice
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
+
+
+
+Hoffman & Hildebrand     Expires April 17, 2017                 [Page 1]
+
+Internet-Draft                 DNS in JSON                  October 2016
+
+
    include Simplified BSD License text as described in Section 4.e of
    the Trust Legal Provisions and are provided without warranty as
    described in the Simplified BSD License.
-
-
-
-Hoffman & Hildebrand     Expires March 24, 2017                 [Page 1]
-
-Internet-Draft                 DNS in JSON                September 2016
-
 
 Table of Contents
 
@@ -67,17 +71,18 @@ Table of Contents
    2.  Template  . . . . . . . . . . . . . . . . . . . . . . . . . .   4
      2.1.  PREFIX  . . . . . . . . . . . . . . . . . . . . . . . . .   4
      2.2.  QNAME . . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     2.3.  QTYPE . . . . . . . . . . . . . . . . . . . . . . . . . .   5
+     2.3.  QTYPE . . . . . . . . . . . . . . . . . . . . . . . . . .   6
      2.4.  Additional Parameters . . . . . . . . . . . . . . . . . .   6
    3.  Queries . . . . . . . . . . . . . . . . . . . . . . . . . . .   7
    4.  Responses . . . . . . . . . . . . . . . . . . . . . . . . . .   8
-   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   8
-   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   9
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .   9
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .  10
-   Appendix A.  Previous Work on DNS over HTTP or in Other Formats .  11
+   5.  Use in HTTP/2 . . . . . . . . . . . . . . . . . . . . . . . .   9
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   9
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .   9
+   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   9
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   9
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .  10
+   Appendix A.  Previous Work on DNS over HTTP or in Other Formats .  12
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  12
 
 1.  Introduction
@@ -101,18 +106,16 @@ Table of Contents
 
    A server that supports this protocol is called a "DNS API server" to
    differentiate it from a "DNS server" (one that uses the regular DNS
+
+
+
+Hoffman & Hildebrand     Expires April 17, 2017                 [Page 2]
+
+Internet-Draft                 DNS in JSON                  October 2016
+
+
    protocol).  Similarly, a client supports this protocol is called a
    "DNS API client".
-
-
-
-
-
-
-Hoffman & Hildebrand     Expires March 24, 2017                 [Page 2]
-
-Internet-Draft                 DNS in JSON                September 2016
-
 
 1.1.  Use Cases
 
@@ -139,9 +142,16 @@ Internet-Draft                 DNS in JSON                September 2016
    done using existing HTTP semantics.
 
    As HTTP/2 [RFC7540] and QUIC [I-D.hamilton-early-deployment-quic]
-   become more widely deployed, this protocols might become more
+   become more widely deployed, this protocol might become more
    important because an HTTP/2 or QUIC server might push DNS responses
    to a client that the HTTP/2 server expects the client to look up.
+   This will be covered in Section 5.  TODO: this discussion of H2 push
+   needs to be expanded by people with this use case.
+
+   These use cases assume that the server is a resolver, but this
+   protocol can certainly be used in use cases where the server is an
+   authoritative server.  Such use cases may be added to this document,
+   or may be documented later.
 
 1.2.  Protocol Requirements
 
@@ -151,6 +161,14 @@ Internet-Draft                 DNS in JSON                September 2016
    o  The protocol must use HTTP semantics the way that they are
       commonly used in other protocols; there is nothing special about
       the DNS use case.
+
+
+
+
+Hoffman & Hildebrand     Expires April 17, 2017                 [Page 3]
+
+Internet-Draft                 DNS in JSON                  October 2016
+
 
    o  The protocol must run over secure transport.
 
@@ -162,14 +180,6 @@ Internet-Draft                 DNS in JSON                September 2016
 
    o  Both the query format and the response formats must be extensible.
       In specific, a query must be able to contain one or more EDNS
-
-
-
-Hoffman & Hildebrand     Expires March 24, 2017                 [Page 3]
-
-Internet-Draft                 DNS in JSON                September 2016
-
-
       extensions, including those not yet defined.  Further, it must be
       easy to define different response formats and to extend already-
       defined formats.
@@ -208,23 +218,26 @@ Internet-Draft                 DNS in JSON                September 2016
    the above template.  Often, this will mean that the template should
    end with a "/" (U+002F: SOLIDUS).
 
+
+
+
+Hoffman & Hildebrand     Expires April 17, 2017                 [Page 4]
+
+Internet-Draft                 DNS in JSON                  October 2016
+
+
    The DNS API client discovers the PREFIX for the DNS API through the
    same mechanism as for a DNS resolver: DHCPv4, DHCPv6, IPv6 RA, and
    configuration.  Specific PREFIX discovery mechanisms will be defined
    later, but imagine a new DHCP or RA option that gives a PREFIX.
 
-   If no PREFIX is configured as above, the client MAY query their
-   existing DNS server for API support by doing a DNS queury query for
-   the URI RRtype (see [RFC7553]) to the domain "_dnsapi.invalid".  If
-   the DNS server knows about API support, the returned URI will be the
-   PREFIX.
+   If no PREFIX is configured as above, the client MAY query a DNS
+   resolver for which they have an IP address.  The query is
 
+      https://<IPADDRESS>/.well_known/TBD1
 
-
-Hoffman & Hildebrand     Expires March 24, 2017                 [Page 4]
-
-Internet-Draft                 DNS in JSON                September 2016
-
+   If the DNS server knows about API support, the returned URI will be
+   the PREFIX.
 
    The response to this discovery might be multiple PREFIXes.  In that
    case, some of the URI types might not be supported by the resolver;
@@ -233,7 +246,7 @@ Internet-Draft                 DNS in JSON                September 2016
    DNS API client can only generate https: queries, the other URI
    templates are ignored.
 
-   Note: there are several concerns to be worked out with respect to the
+   TODO: there are several concerns to be worked out with respect to the
    PREFIX, including how to bootstrap PREFIXes that contain domain
    names, and how to trust TLS connections to PREFIXes that contain only
    IP addresses in a deployable way.  Some ideas might come from RFC
@@ -249,10 +262,10 @@ Internet-Draft                 DNS in JSON                September 2016
 
 2.2.  QNAME
 
-   The QNAME from [RFC1035].
+   The QNAME is adopted from [RFC1035].
 
-   Note: An open issue exists with how to encode non-ASCII domain names.
-   For IDNs, there are several options:
+   TODO: how to encode non-ASCII domain names.  For IDNs, there are
+   several options:
 
    o  Punycode all labels before sending
 
@@ -262,25 +275,24 @@ Internet-Draft                 DNS in JSON                September 2016
    o  Send generic UTF8-encoded labels, and make the server do
       normalization
 
-   There is also a question about domain names (not host names) that
-   have values that might cause problems in the URI format, such as
-   values that are control characters in ASCII, and values greater than
-   127.
+
+
+Hoffman & Hildebrand     Expires April 17, 2017                 [Page 5]
+
+Internet-Draft                 DNS in JSON                  October 2016
+
+
+   TODO: domain names (not host names) that have values that might cause
+   problems in the URI format, such as values that are control
+   characters in ASCII, and values greater than 127.
 
 2.3.  QTYPE
 
-   The numerical QTYPE from [RFC1035].
+   The numerical QTYPE is adopted from [RFC1035].
 
-   Note: there are some people that want to use the string forms, such
+   TODO: there are some people that want to use the string forms, such
    as "AAAA", perhaps in addition to the numerical form.  To be
    discussed.
-
-
-
-Hoffman & Hildebrand     Expires March 24, 2017                 [Page 5]
-
-Internet-Draft                 DNS in JSON                September 2016
-
 
 2.4.  Additional Parameters
 
@@ -317,6 +329,15 @@ Internet-Draft                 DNS in JSON                September 2016
    omitted, the server assumes that the extension was not given in the
    request.
 
+
+
+
+
+Hoffman & Hildebrand     Expires April 17, 2017                 [Page 6]
+
+Internet-Draft                 DNS in JSON                  October 2016
+
+
    nsid:  Request the server's NSID, based on [RFC5001].  Set to "1" to
       enable.
 
@@ -327,16 +348,6 @@ Internet-Draft                 DNS in JSON                September 2016
    dhu:  Specify the list of hash algorithms understood, based on
       [RFC6975].  The value is a list of integers separated by commas
       (with no spaces).
-
-
-
-
-
-
-Hoffman & Hildebrand     Expires March 24, 2017                 [Page 6]
-
-Internet-Draft                 DNS in JSON                September 2016
-
 
    n3u:  Specify the list of NSEC3 hash algorithms understood, based on
       [RFC6975].  The value is a list of integers separated by commas
@@ -349,27 +360,39 @@ Internet-Draft                 DNS in JSON                September 2016
    pad:  Optional padding, used for the same purposes as described in
       [RFC7830].  This can be used to normalize the length of queries.
 
-   See Section 5 for a registry for additional names for queries.
+   See Section 6 for a registry for additional names for queries.
 
 3.  Queries
 
    To send a DNS query, the DNS API client prepares an HTTP/CoAP GET
    request using the template (see Section 2).  If any additional
    parameters (see Section 2.4) are desired, they are appended to the
-   template in typical HTTPS URI fashion, using a "?"  (U+003F: QUESTION
-   MARK), then each parameter specified as a name, "=" (U+003D: EQUALS
-   SIGN), and value, each name=value pair separated by a "&" (U+0026:
-   AMPERSAND).  Each value should be percent-encoded as needed.  The
-   client MUST ensure that the resulting URI is valid.
+   template as if they are HTML form data.  (See Sections 4.10.22.3 and
+   4.10.22.4 of [HTMLSPEC] for the full specification of form data.)
+   Typically, this is done using a "?"  (U+003F: QUESTION MARK), then
+   each parameter specified as a name, "=" (U+003D: EQUALS SIGN), and
+   value, each name=value pair separated by a "&" (U+0026: AMPERSAND).
+   Each value should be percent-encoded as needed.  The client MUST
+   ensure that the resulting URI is valid.
 
    The HTTP-related requirements include:
 
    o  The HTTP GET request MUST have no body.
 
    o  The HTTP GET request SHOULD be sent with an HTTP "Accept:" header
-      to say what type of content can be returned.  If the request does
+      to say what type of content can be returned; of course, a server
+      can return whatever type of content it wants.  If the request does
       not have an HTTP "Accept:" header, the DNS API server might return
       a content type that the DNS API client does not understand.
+
+
+
+
+
+Hoffman & Hildebrand     Expires April 17, 2017                 [Page 7]
+
+Internet-Draft                 DNS in JSON                  October 2016
+
 
    o  The HTTP GET request SHOULD use If-None-Match headers if earlier
       responses to the same query used HTTP ETag headers as described in
@@ -385,14 +408,6 @@ Internet-Draft                 DNS in JSON                September 2016
       https://dnsserver.example.net/api/v1/www.example.com/1?rd=0
 
    The HTTP request might look like:
-
-
-
-
-Hoffman & Hildebrand     Expires March 24, 2017                 [Page 7]
-
-Internet-Draft                 DNS in JSON                September 2016
-
 
       GET api/v1/www.example.com/1?rd=0 HTTP/1.1
       User-Agent: curl/7.16.3 libcurl/7.16.3
@@ -424,13 +439,35 @@ Internet-Draft                 DNS in JSON                September 2016
    TTL in the response.  The HTTP responses SHOULD set the HTTP ETag
    headers as described in [RFC7232].
 
-5.  IANA Considerations
+   TODO: Add more detail about setting the HTTP cache headers.
+
+   TODO: Add examples of creating these ETag headers.
+
+
+
+Hoffman & Hildebrand     Expires April 17, 2017                 [Page 8]
+
+Internet-Draft                 DNS in JSON                  October 2016
+
+
+   Servers conforming to this protocol MUST implement responding with
+   messages formatted with [I-D.hoffman-dns-in-json].
+
+5.  Use in HTTP/2
+
+   TODO: Full discussion about using this protocol in HTTP/2 for server
+   push.  This will also hopefully cover caching and DNS TTLs.
+
+6.  IANA Considerations
 
    TODO: Create a new registry for option names for DNS queries.  This
    will be a simple registry for new option names, probably with a
    designated expert.
 
-6.  Security Considerations
+   TODO: Replace TBD1 in the body with a string from the .well_known
+   registry.  Reference [RFC5785].
+
+7.  Security Considerations
 
    This protocol requires the use of TLS for communication.  If a client
    does not enforce authentication of the TLS server, the communication
@@ -440,24 +477,18 @@ Internet-Draft                 DNS in JSON                September 2016
    TODO: Think about whether cross-origin resource sharing (CORS)
    applies to this protocol and, if so, how to specify it.
 
-
-
-
-
-
-Hoffman & Hildebrand     Expires March 24, 2017                 [Page 8]
-
-Internet-Draft                 DNS in JSON                September 2016
-
-
-7.  Acknowledgements
+8.  Acknowledgements
 
    Early input to this document came from Mark Nottingham and and
    Patrick McManus.
 
-8.  References
+9.  References
 
-8.1.  Normative References
+9.1.  Normative References
+
+   [HTMLSPEC]
+              W3C, "HTML5, A vocabulary and associated APIs for HTML and
+              XHTML", 2016, <https://www.w3.org/TR/html5/>.
 
    [RFC1035]  Mockapetris, P., "Domain names - implementation and
               specification", STD 13, RFC 1035, DOI 10.17487/RFC1035,
@@ -467,6 +498,13 @@ Internet-Draft                 DNS in JSON                September 2016
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
+
+
+
+Hoffman & Hildebrand     Expires April 17, 2017                 [Page 9]
+
+Internet-Draft                 DNS in JSON                  October 2016
+
 
    [RFC4035]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
               Rose, "Protocol Modifications for the DNS Security
@@ -493,20 +531,7 @@ Internet-Draft                 DNS in JSON                September 2016
               DOI 10.17487/RFC7232, June 2014,
               <http://www.rfc-editor.org/info/rfc7232>.
 
-   [RFC7553]  Faltstrom, P. and O. Kolkman, "The Uniform Resource
-              Identifier (URI) DNS Resource Record", RFC 7553,
-              DOI 10.17487/RFC7553, June 2015,
-              <http://www.rfc-editor.org/info/rfc7553>.
-
-
-
-
-Hoffman & Hildebrand     Expires March 24, 2017                 [Page 9]
-
-Internet-Draft                 DNS in JSON                September 2016
-
-
-8.2.  Informative References
+9.2.  Informative References
 
    [I-D.hamilton-early-deployment-quic]
               Hamilton, R., Iyengar, J., Swett, I., and A. Wilk, "QUIC:
@@ -521,11 +546,21 @@ Internet-Draft                 DNS in JSON                September 2016
 
    [I-D.hoffman-dns-in-json]
               Hoffman, P., "Representing DNS Messages in JSON", draft-
-              hoffman-dns-in-json-07 (work in progress), September 2016.
+              hoffman-dns-in-json-09 (work in progress), October 2016.
 
    [I-D.nottingham-json-home]
               Nottingham, M., "Home Documents for HTTP APIs", draft-
               nottingham-json-home-04 (work in progress), May 2016.
+
+
+
+
+
+
+Hoffman & Hildebrand     Expires April 17, 2017                [Page 10]
+
+Internet-Draft                 DNS in JSON                  October 2016
+
 
    [I-D.song-dns-wireformat-http]
               Song, L., Vixie, P., Kerr, S., and R. Wan, "DNS wire-
@@ -535,6 +570,11 @@ Internet-Draft                 DNS in JSON                September 2016
    [RFC5001]  Austein, R., "DNS Name Server Identifier (NSID) Option",
               RFC 5001, DOI 10.17487/RFC5001, August 2007,
               <http://www.rfc-editor.org/info/rfc5001>.
+
+   [RFC5785]  Nottingham, M. and E. Hammer-Lahav, "Defining Well-Known
+              Uniform Resource Identifiers (URIs)", RFC 5785,
+              DOI 10.17487/RFC5785, April 2010,
+              <http://www.rfc-editor.org/info/rfc5785>.
 
    [RFC6147]  Bagnulo, M., Sullivan, A., Matthews, P., and I. van
               Beijnum, "DNS64: DNS Extensions for Network Address
@@ -552,16 +592,6 @@ Internet-Draft                 DNS in JSON                September 2016
               (DNSSEC)", RFC 6975, DOI 10.17487/RFC6975, July 2013,
               <http://www.rfc-editor.org/info/rfc6975>.
 
-
-
-
-
-
-Hoffman & Hildebrand     Expires March 24, 2017                [Page 10]
-
-Internet-Draft                 DNS in JSON                September 2016
-
-
    [RFC7049]  Bormann, C. and P. Hoffman, "Concise Binary Object
               Representation (CBOR)", RFC 7049, DOI 10.17487/RFC7049,
               October 2013, <http://www.rfc-editor.org/info/rfc7049>.
@@ -578,6 +608,15 @@ Internet-Draft                 DNS in JSON                September 2016
    [RFC7435]  Dukhovni, V., "Opportunistic Security: Some Protection
               Most of the Time", RFC 7435, DOI 10.17487/RFC7435,
               December 2014, <http://www.rfc-editor.org/info/rfc7435>.
+
+
+
+
+
+Hoffman & Hildebrand     Expires April 17, 2017                [Page 11]
+
+Internet-Draft                 DNS in JSON                  October 2016
+
 
    [RFC7540]  Belshe, M., Peon, R., and M. Thomson, Ed., "Hypertext
               Transfer Protocol Version 2 (HTTP/2)", RFC 7540,
@@ -610,14 +649,6 @@ Appendix A.  Previous Work on DNS over HTTP or in Other Formats
 
    o  https://tools.ietf.org/html/draft-bortzmeyer-dns-json
 
-
-
-
-Hoffman & Hildebrand     Expires March 24, 2017                [Page 11]
-
-Internet-Draft                 DNS in JSON                September 2016
-
-
    o  https://www.nlnetlabs.nl/projects/dnssec-trigger/
 
 Authors' Addresses
@@ -638,35 +669,4 @@ Authors' Addresses
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hoffman & Hildebrand     Expires March 24, 2017                [Page 12]
+Hoffman & Hildebrand     Expires April 17, 2017                [Page 12]
